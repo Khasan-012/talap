@@ -486,7 +486,6 @@
       <button class="btn ghost" id="btnBack2">← Назад</button>
       <button class="btn next" id="btnNext">Далее →</button>
     </div>
-    <button class="skip" id="btnSkipSec" style="display:block;margin:10px auto 0;background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit;">Пропустить раздел →</button>
   </section>
 
   <!-- Загрузка -->
@@ -1074,10 +1073,6 @@ function goBack(){
   secIdx--; save(); renderSection(-1);
 }
 document.getElementById('btnNext').addEventListener('click',goNext);
-document.getElementById('btnSkipSec').addEventListener('click',function(){
-  if(secIdx>=8){ showLoading(); return; }
-  secIdx++; save(); renderSection(1);
-});
 document.getElementById('btnBack').addEventListener('click',goBack);
 document.getElementById('btnBack2').addEventListener('click',goBack);
 
