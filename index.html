@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#141131">
+<title>Talap — Анкета профиля</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+    scrollbar-width:thin; scrollbar-color:#2e2e33 transparent; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#2e2e33; border:1px solid rgba(255,255,255,.12); border-radius:99px; }
+  ::-webkit-scrollbar-thumb:hover { background:#3a3a41; }
+  :root {
+    --bg:#000000; --card:#1e1e1e; --card2:#262626;
+    --line:rgba(255,255,255,.07); --txt:#ffffff; --mut:#a1a1a6;
+    --acc:#00d2ff; --acc2:#7b2ff7; --acc3:#ff2e93;
+    --grad:linear-gradient(90deg,#00d2ff,#7b2ff7,#ff2e93);
+  }
+  [hidden] { display:none !important; }
+  body {
+    font-family:-apple-system,'SF Pro Display','SF Pro Text','Segoe UI',system-ui,sans-serif; color:var(--txt);
+    min-height:100dvh; background:var(--bg);
+    display:flex; justify-content:center;
+  }
+  .app { width:100%; max-width:520px; height:100dvh; display:flex; flex-direction:column;
+    padding:0 18px; position:relative; z-index:1; background:var(--bg); }
+
+  /* ---------- Главная (дашборд) ---------- */
+  .welcome { flex:1; overflow-y:auto; padding-bottom:16px; animation:fadeUp .5s ease; scrollbar-width:thin; }
+  .dash-top { display:flex; justify-content:space-between; align-items:flex-start;
+    padding-top:calc(18px + env(safe-area-inset-top)); margin-bottom:16px; }
+  .dash-top h1 { font-size:32px; font-weight:800; letter-spacing:-.5px; line-height:1.1; margin-top:6px; }
+  .brand { font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--mut); }
+  .dash-actions { display:flex; gap:10px; }
+  .iconbtn { width:42px; height:42px; border-radius:50%; border:1px solid var(--line);
+    background:var(--card); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active { transform:scale(.92); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:18px;
+    box-shadow:0 12px 32px rgba(0,0,0,.45); }
+  .card.sq { min-height:178px; display:flex; flex-direction:column; justify-content:center; gap:8px; }
+  .card.wide { grid-column:1/-1; }
+  .card.long { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .bignum { font-size:46px; font-weight:800; letter-spacing:-1.5px; line-height:1; }
+  .bignum small { font-size:15px; color:var(--mut); font-weight:600; letter-spacing:0; }
+  .bignum2 { font-size:21px; font-weight:800; letter-spacing:-.3px; line-height:1.25; margin-top:4px; }
+  .cap { font-size:12px; color:var(--mut); line-height:1.45; }
+  .ringbox { position:relative; width:104px; height:104px; }
+  .ring-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:21px; font-weight:800; letter-spacing:-.5px; }
+  .dots9 { display:flex; gap:6px; margin:12px 0 8px; }
+  .dots9 i { flex:1; height:30px; border-radius:8px; background:rgba(255,255,255,.07); }
+  .dots9 i.cur { background:rgba(0,210,255,.4); }
+  .dots9 i.done { background:linear-gradient(180deg,#00d2ff,#7b2ff7); }
+  .seclist { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .seclist div { font-size:13px; color:var(--mut); background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:11px 15px; }
+  .seclist b { color:#fff; }
+
+  /* ---------- Таббар ---------- */
+  .tabbar { flex:none; display:flex; background:rgba(18,18,20,.92); backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--line);
+    margin:0 -18px; padding:8px 6px calc(10px + env(safe-area-inset-bottom)); }
+  .tab { flex:1; background:none; border:none; color:var(--mut); display:flex; flex-direction:column;
+    align-items:center; gap:3px; font-size:10px; font-weight:600; cursor:pointer; font-family:inherit; padding:6px 0; }
+  .tab.active { color:#fff; }
+  .tab svg { width:23px; height:23px; }
+
+  /* ---------- Пустые состояния / чат ---------- */
+  .page { flex:1; overflow-y:auto; padding-bottom:16px; animation:fadeUp .4s ease; }
+  .page h1 { font-size:30px; font-weight:800; letter-spacing:-.5px; padding-top:calc(20px + env(safe-area-inset-top)); }
+  .page .psub { color:var(--mut); font-size:14px; margin:8px 0 18px; line-height:1.55; }
+  .chatbox { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .msg { max-width:85%; padding:12px 15px; border-radius:18px; font-size:14px; line-height:1.5; }
+  .msg.ai { background:var(--card); border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:6px; }
+  .msg.me { background:linear-gradient(135deg,#00d2ff,#7b2ff7); align-self:flex-end; border-bottom-right-radius:6px; }
+  .chatrow { display:flex; gap:8px; }
+  .chatrow .field { flex:1; }
+
+  /* ---------- Buttons ---------- */
+  .btn { display:block; width:100%; padding:16px; border-radius:16px; border:none; font-size:16px;
+    font-weight:800; cursor:pointer; color:#fff; background:var(--grad); background-size:200%;
+    transition:.25s; font-family:inherit; }
+  .btn:hover { background-position:100%; }
+  .btn:active { transform:scale(.98); }
+  .btn.ghost { background:var(--card); border:1px solid var(--line); margin-top:10px; font-weight:600; }
+  .link { background:none; border:none; color:var(--mut); font-size:13px; margin-top:14px;
+    cursor:pointer; text-decoration:underline; font-family:inherit; }
+
+  /* ---------- Survey chrome ---------- */
+  .topbar { padding-top:calc(14px + env(safe-area-inset-top)); flex:none; }
+  .toprow { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .back { width:38px; height:38px; flex:none; border-radius:12px; border:1px solid var(--line);
+    background:var(--card); color:#fff; font-size:17px; cursor:pointer; }
+  .back:active { transform:scale(.94); }
+  .secinfo { flex:1; min-width:0; }
+  .secinfo b { display:block; font-size:15px; }
+  .secinfo span { font-size:12px; color:var(--mut); }
+  .pbar { height:7px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
+  .pfill { height:100%; width:0; border-radius:99px; background:var(--grad); transition:width .4s ease; }
+  .ticks { display:flex; gap:4px; margin-top:8px; }
+  .ticks i { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.12); }
+  .ticks i.done { background:rgba(0,210,255,.45); }
+  .ticks i.cur { background:var(--acc); box-shadow:0 0 8px rgba(0,210,255,.7); }
+
+  .stagewrap { flex:1; overflow-y:auto; padding:18px 2px 10px; scrollbar-width:thin; }
+  .stage.in-r { animation:slideR .35s cubic-bezier(.22,1,.36,1); }
+  .stage.in-l { animation:slideL .35s cubic-bezier(.22,1,.36,1); }
+  @keyframes slideR { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:none; } }
+  @keyframes slideL { from { opacity:0; transform:translateX(-60px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+  .shake { animation:shake .3s; }
+
+  .sechead { margin-bottom:18px; }
+  .sechead .n { font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--acc); }
+  .sechead h2 { font-size:26px; font-weight:800; margin:4px 0; }
+  .sechead p { font-size:14px; color:var(--mut); line-height:1.5; }
+
+  /* вопрос на странице раздела */
+  .qb { background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:16px 15px; margin-bottom:14px; }
+  .qb.err { border-color:var(--acc3); box-shadow:0 0 0 3px rgba(255,46,147,.15); }
+  .qlabel { font-size:15px; font-weight:700; line-height:1.35; margin-bottom:3px; }
+  .qlabel .req { color:var(--acc3); }
+  .qsub { font-size:12px; color:var(--mut); margin-bottom:12px; line-height:1.5; }
+
+  .opts { display:flex; flex-direction:column; gap:9px; }
+  .opt { text-align:left; width:100%; padding:13px 14px; border-radius:14px; cursor:pointer;
+    background:rgba(255,255,255,.05); border:1.5px solid var(--line); color:#fff; font-size:14px;
+    font-family:inherit; transition:.15s; display:flex; align-items:center; gap:11px; }
+  .opt small { display:block; font-size:12px; color:var(--mut); margin-top:2px; }
+  .opt:active { transform:scale(.98); }
+  .opt.sel { border-color:var(--acc); background:rgba(0,210,255,.12); box-shadow:0 0 0 3px rgba(0,210,255,.1); }
+  .opt .radio { flex:none; width:20px; height:20px; border-radius:50%; border:2px solid rgba(255,255,255,.35); position:relative; }
+  .opt.sel .radio { border-color:var(--acc); }
+  .opt.sel .radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--acc); }
+  .opt .check { flex:none; width:20px; height:20px; border-radius:6px; border:2px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
+  .opt.sel .check { border-color:var(--acc); background:var(--acc); color:#04222b; }
+
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { padding:10px 15px; border-radius:99px; border:1.5px solid var(--line); background:rgba(255,255,255,.05);
+    font-size:13px; cursor:pointer; transition:.15s; user-select:none; }
+  .chip:active { transform:scale(.95); }
+  .chip.sel { background:linear-gradient(90deg,rgba(0,210,255,.25),rgba(123,47,247,.25));
+    border-color:var(--acc); font-weight:700; }
+
+  .field, .area, select.field { width:100%; padding:13px 14px; border-radius:13px; font-size:15px;
+    border:1.5px solid var(--line); background:rgba(255,255,255,.05); color:#fff; outline:none; font-family:inherit; }
+  .field:focus, .area:focus { border-color:var(--acc); box-shadow:0 0 0 4px rgba(0,210,255,.13); }
+  select.field option { color:#111; }
+  .area { min-height:96px; resize:vertical; }
+  .addrow { display:flex; gap:8px; margin-top:10px; }
+  .addrow .field { flex:1; }
+  .addbtn { flex:none; padding:0 18px; border-radius:13px; border:none; font-size:20px; cursor:pointer;
+    color:#fff; background:linear-gradient(135deg,#00d2ff,#7b2ff7); }
+
+  .scale5 { display:flex; gap:7px; }
+  .scale5 button { flex:1; padding:14px 0; border-radius:13px; border:1.5px solid var(--line);
+    background:rgba(255,255,255,.05); color:#fff; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .scale5 button.sel { border-color:var(--acc); background:rgba(0,210,255,.16); box-shadow:0 0 0 3px rgba(0,210,255,.1); }
+  .scalelabels { display:flex; justify-content:space-between; font-size:11px; color:var(--mut); margin-top:7px; }
+
+  .mini { margin-bottom:12px; }
+  .mini:last-child { margin-bottom:0; }
+  .mini > b { font-size:12px; display:block; margin-bottom:7px; color:#9be9ff; }
+  .pills { display:flex; gap:7px; }
+  .pills button { flex:1; padding:10px 0; border-radius:11px; border:1.5px solid var(--line);
+    background:rgba(255,255,255,.05); color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .pills button.sel { border-color:var(--acc); background:rgba(0,210,255,.16); }
+
+  .bottombar { flex:none; padding-top:12px; display:flex; gap:10px; }
+  .bottombar .btn.ghost { margin-top:0; flex:.55; }
+  .bottombar .btn.next { flex:1; }
+
+  /* крутилка возраста */
+  .wheel-wrap { position:relative; }
+  .wheel { position:relative; height:220px; overflow-y:auto; overscroll-behavior:contain;
+    border-radius:14px; background:rgba(255,255,255,.05); border:1.5px solid var(--line);
+    scroll-snap-type:y mandatory; scrollbar-width:none; }
+  .wheel::-webkit-scrollbar { display:none; }
+  .wheel-list { padding:88px 0; }
+  .wheel-item { height:44px; display:flex; align-items:center; justify-content:center;
+    font-size:17px; color:var(--mut); cursor:pointer; scroll-snap-align:center;
+    transition:font-size .2s, color .2s; user-select:none; }
+  .wheel-item.sel { font-size:24px; font-weight:800; color:#fff; }
+  .wheel-fade { position:absolute; left:0; right:0; height:70px; pointer-events:none; z-index:2; }
+  .wheel-fade.top { top:0; border-radius:14px 14px 0 0;
+    background:linear-gradient(rgba(0,0,0,.95),transparent); }
+  .wheel-fade.bot { bottom:0; border-radius:0 0 14px 14px;
+    background:linear-gradient(transparent,rgba(0,0,0,.95)); }
+  .wheel-hi { position:absolute; left:10px; right:10px; top:50%; height:44px; transform:translateY(-50%);
+    border-top:1px solid rgba(0,210,255,.5); border-bottom:1px solid rgba(0,210,255,.5);
+    background:rgba(0,210,255,.07); border-radius:8px; pointer-events:none; z-index:1; }
+
+  /* карусель мини-тестов */
+  .sit-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .sit-arrow { width:40px; height:40px; flex:none; border-radius:50%; border:1px solid var(--line);
+    background:rgba(255,255,255,.07); color:#fff; font-size:17px; cursor:pointer; font-family:inherit; }
+  .sit-arrow:active { transform:scale(.9); }
+  .sit-count { flex:1; text-align:center; font-size:12px; color:var(--acc); font-weight:800; letter-spacing:1px; }
+  .sit-q { font-size:15px; font-weight:700; line-height:1.45; margin-bottom:12px; }
+  .sit-dots { display:flex; gap:4px; margin-top:12px; }
+  .sit-dots i { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.12); }
+  .sit-dots i.done { background:rgba(0,210,255,.5); }
+  .sit-dots i.cur { background:var(--acc); }
+  .sittest.sit-r { animation:slideR .3s ease; }
+  .sittest.sit-l { animation:slideL .3s ease; }
+  .qb-new { animation:qbIn .45s cubic-bezier(.22,1,.36,1); }
+  @keyframes qbIn { from { opacity:0; transform:translateY(-16px) scale(.98); } to { opacity:1; transform:none; } }
+
+  /* ---------- Result ---------- */
+  .result { flex:1; overflow-y:auto; padding:26px 4px 10px; animation:fadeUp .5s ease; }
+  .result h1 { font-size:26px; font-weight:800; }
+  .result h1 span { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .result .hello { color:var(--mut); font-size:14px; margin:8px 0 18px; line-height:1.6; }
+  .dir { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px; margin-bottom:12px; }
+  .dir.top { border-color:rgba(0,210,255,.5); background:rgba(0,210,255,.07); }
+  .dir .rank { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--acc); }
+  .dir h3 { font-size:18px; margin:4px 0; }
+  .dir p { font-size:13px; color:var(--mut); line-height:1.55; }
+  .bar { height:8px; border-radius:99px; background:rgba(255,255,255,.1); margin:10px 0 4px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; border-radius:99px; background:var(--grad); transition:width 1s cubic-bezier(.22,1,.36,1); }
+  .pct { font-size:12px; color:var(--acc); font-weight:800; }
+  .tier-head { display:flex; align-items:center; gap:10px; margin:20px 0 10px; }
+  .tier-badge { flex:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:18px; font-weight:800; }
+  .tier-badge.s { background:linear-gradient(135deg,#ffd166,#ff8f00); color:#3a2400; }
+  .tier-badge.a { background:linear-gradient(135deg,#7b2ff7,#00d2ff); color:#fff; }
+  .tier-badge.b { background:linear-gradient(135deg,#00d2ff,#0055ff); color:#fff; }
+  .tier-badge.dream { background:linear-gradient(135deg,#ffd166,#ff8f00); color:#3a2400; }
+  .tier-badge.target { background:linear-gradient(135deg,#7b2ff7,#00d2ff); color:#fff; }
+  .tier-badge.safety { background:linear-gradient(135deg,#00d2ff,#0055ff); color:#fff; }
+  .multibar { position:sticky; top:0; z-index:5; background:rgba(20,16,50,.96); border:1px solid rgba(0,210,255,.4);
+    border-radius:16px; padding:12px 14px; margin-bottom:12px; }
+  .multibar b { font-size:14px; display:block; }
+  .multibar span { font-size:12px; color:var(--mut); }
+  .unichips { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px; }
+  .unichip { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
+    background:rgba(0,210,255,.12); border:1.5px solid var(--acc); border-radius:99px; padding:8px 8px 8px 14px; cursor:pointer; }
+  .unichip.off { background:rgba(255,255,255,.05); border-color:var(--line); font-weight:600; color:var(--mut); }
+  .unichip .x { width:22px; height:22px; border-radius:50%; border:none; background:rgba(255,255,255,.15);
+    color:#fff; font-size:12px; cursor:pointer; line-height:1; }
+  .unicard.picked { border-color:rgba(0,210,255,.6); box-shadow:0 0 0 3px rgba(0,210,255,.12); }
+  .tier-name { font-size:15px; font-weight:800; }
+  .tier-sub { font-size:12px; color:var(--mut); }
+  .unicard { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 15px; margin-bottom:10px; overflow:hidden; }
+  .unicard h4 { font-size:16px; }
+  .unicard .place { font-size:12px; color:var(--mut); margin:2px 0 8px; }
+  .unicard p { font-size:13px; color:var(--mut); line-height:1.55; margin-top:6px; }
+  .uniphoto { margin:-14px -15px 12px; height:132px; overflow:hidden; background:#2b2b30; position:relative; }
+  .uniphoto img { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
+  .uni-noimg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:#2b2b30; }
+  .uni-noimg span { font-size:52px; line-height:1; filter:grayscale(1); opacity:.85; }
+  .unicard { cursor:pointer; transition:transform .2s; }
+  .unicard:active { transform:scale(.98); }
+  .unicard .tap { font-size:11px; color:var(--acc); margin-top:8px; font-weight:700; }
+  .rev { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-bottom:8px; }
+  .rev b { font-size:13px; display:block; }
+  .rev .stars { color:#ffd166; font-size:12px; letter-spacing:2px; margin:3px 0 5px; }
+  .rev p { font-size:13px; color:var(--mut); line-height:1.55; margin:0; }
+  .redditbtn { display:block; text-align:center; margin-top:10px; padding:12px; border-radius:13px;
+    border:1.5px solid rgba(255,69,0,.5); background:rgba(255,69,0,.08); color:#ff9a6a;
+    font-size:14px; font-weight:800; text-decoration:none; font-family:inherit; }
+
+  /* детали вуза */
+  #uniModal { position:fixed; inset:0; z-index:150; background:rgba(0,0,0,.7);
+    display:flex; align-items:flex-end; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s; }
+  #uniModal.open { opacity:1; pointer-events:auto; }
+  .usheet { width:100%; max-width:520px; max-height:92dvh; overflow-y:auto; background:#141414;
+    border:1px solid var(--line); border-bottom:none; border-radius:24px 24px 0 0;
+    transform:translateY(60px); transition:transform .35s cubic-bezier(.22,1,.36,1); scrollbar-width:thin; }
+  #uniModal.open .usheet { transform:none; }
+  .uphoto { height:170px; overflow:hidden; border-radius:24px 24px 0 0; background:#2b2b30; position:relative; }
+  .uphoto img { width:100%; height:100%; object-fit:cover; display:block; position:relative; z-index:1; }
+  .uclose { position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%;
+    border:none; background:rgba(0,0,0,.55); color:#fff; font-size:16px; cursor:pointer; }
+  .ubody { padding:18px 18px 30px; }
+  .ubody h3 { font-size:22px; letter-spacing:-.3px; }
+  .ubody .place { font-size:13px; color:var(--mut); margin:4px 0 14px; }
+  .ureq { display:flex; gap:10px; margin-bottom:10px; }
+  .ureq .k { flex:none; width:110px; font-size:12px; color:var(--mut); padding-top:11px; }
+  .ureq .v { flex:1; font-size:14px; background:var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:10px 13px; line-height:1.5; }
+  .ulist { margin:0 0 10px 2px; display:flex; flex-direction:column; gap:8px; }
+  .ulist div { font-size:14px; background:var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:10px 13px; line-height:1.5; }
+  .ulist div b { color:#9be9ff; }
+  .usec { font-size:13px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+    color:var(--acc); margin:16px 0 10px; }
+  .uspinner { text-align:center; padding:30px 0; color:var(--mut); font-size:14px; }
+  .uspinner .spin { width:38px; height:38px; margin:0 auto 12px; border-radius:50%;
+    border:3px solid rgba(255,255,255,.12); border-top-color:var(--acc); animation:rot .8s linear infinite; }
+  @keyframes rot { to { transform:rotate(360deg); } }
+  .ainote { font-size:12px; color:var(--mut); background:var(--card); border:1px dashed var(--line);
+    border-radius:12px; padding:10px 14px; margin-bottom:12px; line-height:1.5; }
+  .prof { margin-top:16px; }
+  .prof h3 { font-size:16px; margin-bottom:10px; }
+  .kv { font-size:13px; background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:9px 13px; margin-bottom:7px; line-height:1.5; }
+  .kv b { color:#9be9ff; }
+
+  /* ---------- Loading ---------- */
+  #view-loading { position:fixed; inset:0; z-index:100; background:#ffffff; color:#141131; }
+  .load-wrap { min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center; animation:fadeUp .4s ease; }
+  .ring { position:relative; width:min(74vw,300px); height:min(74vw,300px); margin-bottom:34px; }
+  .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+  .load-brand { font-size:11px; letter-spacing:5px; text-transform:uppercase; color:#a5a3c7; font-weight:700; }
+  .dot { position:absolute; width:8px; height:8px; margin:-4px; border-radius:50%;
+    animation:dotPulse 2.6s ease-in-out infinite; }
+  @keyframes dotPulse { 0%,100% { opacity:.22; transform:scale(.72); } 50% { opacity:1; transform:scale(1.18); } }
+  .emb { position:absolute; width:36px; height:36px; margin:-18px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:15px;
+    box-shadow:0 4px 14px rgba(30,20,80,.18); background:#fff;
+    animation:embPulse 2.6s ease-in-out infinite; }
+  @keyframes embPulse { 0%,100% { opacity:.55; transform:scale(.94); } 50% { opacity:1; transform:scale(1.1); } }
+  .load-wrap h2 { font-size:22px; font-weight:800; }
+  .load-wrap p { font-size:15px; color:#5b5878; margin-top:6px; }
+  .load-sub { margin-top:14px; font-size:13px; color:#a5a3c7; min-height:20px; }
+
+  /* ---------- Таббар ---------- */
+  .tabbar { flex:none; display:flex; background:rgba(18,18,20,.94); backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--line);
+    margin:0 -18px; padding:8px 6px calc(10px + env(safe-area-inset-bottom)); }
+  .tab { flex:1; background:none; border:none; color:var(--mut); display:flex; flex-direction:column;
+    align-items:center; gap:3px; font-size:10px; font-weight:600; cursor:pointer; font-family:inherit; padding:6px 0; }
+  .tab.active { color:#fff; }
+  .tab svg { width:23px; height:23px; }
+
+  /* ---------- Главная: план ---------- */
+  .mhead { padding-top:calc(18px + env(safe-area-inset-top)); margin-bottom:14px; }
+  .mhead .brand { font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--mut); }
+  .mhead h1 { font-size:30px; font-weight:800; letter-spacing:-.5px; margin-top:4px; line-height:1.15; }
+  .mhead p { font-size:13px; color:var(--mut); margin-top:6px; line-height:1.5; }
+  .plan-top { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+  .pring { position:relative; width:110px; height:110px; flex:none; }
+  .pring-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:800; letter-spacing:-.5px; }
+  .plan-top .cap { font-size:13px; }
+  .plan-top .cap b { display:block; font-size:15px; color:#fff; margin-bottom:2px; }
+  /* батарейка-зарядка */
+  .battery { position:relative; height:26px; border:2px solid rgba(255,255,255,.35);
+    border-radius:9px; margin-top:10px; }
+  .battery::after { content:''; position:absolute; right:-8px; top:6px; width:5px; height:10px;
+    border-radius:0 3px 3px 0; background:rgba(255,255,255,.35); }
+  .blevel { height:100%; border-radius:6px; background:linear-gradient(90deg,#00e676,#00d2ff);
+    transition:width .6s ease; position:relative; overflow:hidden; }
+  .blevel.low { background:linear-gradient(90deg,#ff2e93,#ff8f00); }
+  .bshine { position:absolute; inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.55) 50%,transparent 75%);
+    background-size:220% 100%; animation:shine 1.8s linear infinite; }
+  @keyframes shine { from { background-position:200% 0; } to { background-position:-120% 0; } }
+  .bbolt { position:absolute; left:7px; top:50%; transform:translateY(-50%); animation:blink 1.2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity:.35; } 50% { opacity:1; } }
+  .bcap { font-size:12px; color:var(--mut); margin-top:7px; }
+  .step { display:flex; gap:12px; align-items:flex-start; text-align:left; width:100%;
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px;
+    margin-bottom:10px; cursor:pointer; color:#fff; font-family:inherit; transition:.15s; }
+  .step:active { transform:scale(.98); }
+  .cbox { flex:none; width:24px; height:24px; border-radius:8px; border:2px solid rgba(255,255,255,.3);
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; margin-top:1px; }
+  .step.done .cbox { border-color:var(--acc); background:var(--acc); color:#04222b; }
+  .step .st b { display:block; font-size:14px; margin-bottom:3px; }
+  .step.done .st b { text-decoration:line-through; opacity:.55; }
+  .step .st span { font-size:12px; color:var(--mut); line-height:1.5; display:block; }
+  .step.done .st span { opacity:.5; }
+  .mtag { display:inline-block; font-size:11px; color:#9be9ff; background:rgba(0,210,255,.1);
+    border:1px solid rgba(0,210,255,.25); padding:3px 10px; border-radius:99px; margin-bottom:6px; }
+  .choosebtn { margin-top:10px; width:100%; padding:12px; border-radius:13px; border:1.5px dashed rgba(0,210,255,.5);
+    background:rgba(0,210,255,.07); color:#7ee7ff; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .choosebtn:active { transform:scale(.98); }
+  .choosebtn.picked { border-style:solid; background:rgba(0,210,255,.16); }
+  .month { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:15px; margin-bottom:12px; }
+  .month > b { font-size:15px; display:block; margin-bottom:10px; color:#9be9ff; }
+  .mhead2 { display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%;
+    background:none; border:none; color:#9be9ff; font-family:inherit; cursor:pointer; padding:0; margin-bottom:10px; }
+  .mhead2 b { font-size:15px; text-align:left; }
+  .mhead2 span { flex:none; color:var(--acc); font-size:13px; }
+  .mhead2:active { opacity:.7; }
+  /* обычный календарь */
+  .cal-card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 14px; margin-bottom:12px; }
+  .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .cal-head b { font-size:16px; }
+  .cal-arrow { width:36px; height:36px; border-radius:50%; border:1px solid var(--line);
+    background:rgba(255,255,255,.06); color:#fff; font-size:17px; cursor:pointer; }
+  .cal-arrow:active { transform:scale(.9); }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
+  .cal-grid .dow { font-size:10px; color:var(--mut); padding:4px 0; font-weight:700; }
+  .cal-grid .day { font-size:13px; padding:8px 0; border-radius:10px; color:#fff; }
+  .cal-grid .day.dim { opacity:.22; }
+  .cal-grid .day.today { background:linear-gradient(135deg,#00d2ff,#7b2ff7); font-weight:800; }
+  .cal-grid .day.marked { border:1px solid rgba(0,210,255,.5); }
+  .cal-grid button.day { background:none; border:1px solid transparent; color:#fff; font-family:inherit; cursor:pointer; }
+  .cal-grid button.day:active { transform:scale(.9); }
+  .cal-grid .day.sel { outline:2px solid var(--acc); background:rgba(0,210,255,.18); font-weight:800; }
+  .cal-grid .day.done { border:1px solid rgba(0,210,255,.55); }
+  .daydetail { background:var(--card); border:1px solid rgba(0,210,255,.4); border-radius:18px; padding:15px; margin-bottom:12px; }
+  .daydetail > b { font-size:15px; display:block; margin-bottom:10px; }
+  .cal-tasks { margin-top:4px; }
+  .yearcard { display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
+    margin-bottom:10px; cursor:pointer; color:#fff; font-family:inherit; transition:.15s; }
+  .yearcard:active { transform:scale(.98); }
+  .yearcard .yb { font-size:26px; font-weight:800; letter-spacing:-.5px; }
+  .yearcard .ys { flex:1; font-size:12px; color:var(--mut); }
+  .yearcard .ya { color:var(--acc); font-size:18px; }
+  .backline { background:none; border:none; color:var(--acc); font-size:14px; font-weight:700;
+    cursor:pointer; font-family:inherit; padding:4px 0 2px; }
+  .monthgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .monthbtn { background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px 6px;
+    color:#fff; cursor:pointer; font-family:inherit; display:flex; flex-direction:column; gap:4px; align-items:center; }
+  .monthbtn b { font-size:13px; }
+  .monthbtn span { font-size:11px; color:var(--acc); min-height:14px; }
+  .monthbtn.cur { border-color:var(--acc); background:rgba(0,210,255,.12); }
+  .monthbtn:active { transform:scale(.96); }
+  .mrow { display:flex; gap:10px; align-items:flex-start; width:100%; background:none; border:none;
+    color:#fff; font-family:inherit; text-align:left; padding:8px 0; cursor:pointer;
+    border-top:1px solid rgba(255,255,255,.06); font-size:13px; line-height:1.45; }
+  .mrow:first-of-type { border-top:none; }
+  .mdot { flex:none; width:18px; height:18px; border-radius:50%; border:2px solid rgba(255,255,255,.3); margin-top:1px; }
+  .mrow.done .mdot { border-color:var(--acc); background:var(--acc); }
+  .mrow.done span { text-decoration:line-through; opacity:.5; }
+  .soon { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    color:var(--mut); font-size:14px; padding:40px 0; }
+
+  .toast { position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); z-index:200;
+    background:rgba(20,16,50,.95); border:1px solid var(--acc); color:#fff; font-size:14px;
+    padding:12px 20px; border-radius:14px; opacity:0; pointer-events:none; transition:.3s; max-width:90vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%); }
+
+  /* ---------- Desktop: режим сайта ---------- */
+  @media (min-width:760px){
+    body { display:block; }
+    .app { max-width:1120px; height:auto; min-height:100dvh; margin:0 auto; padding:0 28px 28px; }
+    .tabbar { position:sticky; bottom:0; z-index:60; margin:0 -28px; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); }
+    .tab { flex-direction:row; justify-content:center; font-size:13px; gap:8px; padding:10px 0; }
+    .tab svg { width:20px; height:20px; }
+    .page, .result, .welcome { overflow:visible; }
+    .stagewrap { overflow:visible; }
+    .grid { grid-template-columns:repeat(4,1fr); }
+    .card.sq { min-height:200px; }
+    #tierList { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
+    #tierList .ainote, #tierList .multibar, #tierList .tier-head { grid-column:1/-1; }
+    #tierList .multibar { position:static; }
+    #tierList .unicard { margin-bottom:0; }
+    #dirs { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    #dirs .dir { margin-bottom:0; }
+    #profList { display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+    .monthgrid { grid-template-columns:repeat(4,1fr); }
+    .unichips { margin:14px 0; }
+    #uniModal { align-items:center; padding:24px; }
+    .usheet { border-radius:24px; border-bottom:1px solid var(--line); max-height:86dvh; }
+    .mhead h1 { font-size:36px; }
+    .sechead h2 { font-size:30px; }
+    .qb { padding:20px; }
+    .bottombar { position:sticky; bottom:0; background:var(--bg); padding-bottom:14px; }
+  }
+  @media (min-width:1100px){
+    #tierList { grid-template-columns:1fr 1fr 1fr; }
+    .monthgrid { grid-template-columns:repeat(6,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Опрос: 1 раздел = 1 страница -->
+  <section id="view-survey" hidden style="display:flex;flex-direction:column;flex:1;min-height:0;">
+    <div class="topbar">
+      <div class="toprow">
+        <button class="back" id="btnBack">←</button>
+        <div class="secinfo"><b id="secName">О тебе</b><span id="stepCount">Раздел 1 из 10</span></div>
+      </div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="stagewrap" id="stagewrap"><div class="stage" id="stage"></div></div>
+    <div class="bottombar">
+      <button class="btn ghost" id="btnBack2">← Назад</button>
+      <button class="btn next" id="btnNext">Далее →</button>
+    </div>
+    <button class="skip" id="btnSkipSec" style="display:block;margin:10px auto 0;background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit;">Пропустить раздел →</button>
+  </section>
+
+  <!-- Загрузка -->
+  <section id="view-loading" hidden>
+    <div class="load-wrap">
+      <div class="ring" id="ring">
+        <div class="ring-center">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7b2ff7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v5"/></svg>
+          <div class="load-brand">Talap</div>
+        </div>
+      </div>
+      <h2>ИИ обрабатывает анкету</h2>
+      <p>и находит лучшие университеты</p>
+      <div class="load-sub" id="loadSub">Читаем твои ответы…</div>
+    </div>
+  </section>
+
+  <!-- Результат -->
+  <section id="view-result" class="result" hidden>
+    <h1 id="resTitle">Твой профиль <span>готов</span></h1>
+    <div class="hello" id="resHello"></div>
+    <div id="dirs"></div>
+    <div class="prof"><h3>🎓 Тирлист университетов — 20 вузов</h3><div class="cap" style="margin:6px 0 10px">Можно выбрать несколько вузов сразу — отметь все подходящие, потом нажми «Продолжить».</div><div id="tierList"></div></div>
+    <div class="prof"><h3>📄 Твой профиль</h3><div id="profList"></div></div>
+    <div style="height:16px"></div>
+    <button class="btn" id="btnMain">На главный экран</button>
+    <button class="btn ghost" id="btnDownload">Скачать профиль (JSON)</button>
+    <button class="link" id="btnReset">Пройти заново</button>
+  </section>
+
+  <!-- Главная -->
+  <section id="view-main" class="page" hidden>
+    <div class="mhead"><div class="brand">Talap</div><h1>Главная</h1><p id="mainSub">Твой план поступления</p></div>
+    <div id="mainBody"></div>
+  </section>
+
+  <!-- Календарь -->
+  <section id="view-cal" class="page" hidden>
+    <div class="mhead"><div class="brand">Talap</div><h1>Календарь</h1><p>План подготовки по месяцам</p></div>
+    <div id="calBody"></div>
+  </section>
+
+  <!-- Достижения -->
+  <section id="view-awards" class="page" hidden>
+    <div class="mhead"><div class="brand">Talap</div><h1>Достижения</h1><p id="awSub">Твои победы в одном месте</p></div>
+    <div id="awardsBody"></div>
+  </section>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab" data-tab="awards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.5 2 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.5-2 4-4 4"/></svg><span>Достижения</span></button>
+    <button class="tab active" data-tab="main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Главная</span></button>
+    <button class="tab" data-tab="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Календарь</span></button>
+  </nav>
+
+</div>
+  <!-- Детали вуза -->
+  <div id="uniModal"><div class="usheet" id="uniBody"></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ================= Данные ================= */
+var SUBJECTS = ['Математика','Физика','Информатика','Химия','Биология','География','История','Английский язык','Казахский язык','Русский язык','Литература'];
+var INTERESTS = ['💻 Компьютеры и технологии','🤖 Искусственный интеллект и роботы','🔬 Наука и исследования','➗ Математика','⚙️ Техника и инженерия','🧬 Биология','🧪 Химия','🩺 Медицина и здоровье','🌍 Природа и окружающая среда','🏗️ Строительство и архитектура','💰 Бизнес и предпринимательство','📈 Экономика и финансы','⚖️ Право','🌎 Другие страны и международные отношения','🗣️ Языки','📚 История и общество','🧠 Психология и люди','🎨 Дизайн и рисование','🎬 Кино, видео и контент','🎵 Музыка','✍️ Литература и писательство','📰 Журналистика и медиа','🏃 Спорт','✈️ Путешествия и туризм','🍳 Еда и кулинария','👨‍🏫 Образование и преподавание','🚗 Машины и транспорт','🌱 Сельское хозяйство и растения','🛡️ Безопасность','🎮 Игры','🚀 Космос','🧑‍💼 Работа с людьми и управление','❤️ Помощь людям'];
+var SKILLS = ['Программирование','Создание сайтов','Создание приложений','Дизайн','Монтаж видео','Работа с AI','Анализ данных','Публичные выступления','Лидерство','Командная работа','Написание текстов','Исследовательская работа','Предпринимательство','Продажи','Спорт','Музыка','Иностранные языки'];
+var HOBBIES = ['Спорт','Музыка','Чтение книг','Видеоигры','Рисование','Видео и блог','Фотография','Танцы','Кулинария','Волонтёрство','Клубы','Программирование','Настольные игры','Путешествия'];
+var ACHS = ['Олимпиады','Конкурсы','Хакатоны','Спортивные достижения','Научные проекты','Школьные проекты','Сертификаты','Языковые экзамены','Волонтёрство','Лидерские позиции','Собственные проекты'];
+var JOBS = ['Разработчик','AI / Data-специалист','Врач','Инженер','Предприниматель','Дизайнер','Архитектор','Юрист','Финансист','Маркетолог','Журналист / Медиа','Учёный','Учитель','Психолог','Дипломат'];
+var LANGS = ['Казахский','Русский','Английский','Турецкий','Корейский','Китайский','Немецкий','Французский','Испанский'];
+var AGREE = [{v:'yes',t:'Да'},{v:'rather_yes',t:'Скорее да'},{v:'rather_no',t:'Скорее нет'},{v:'no',t:'Нет'}];
+var LEVELS = [{v:'new',t:'Начинающий',d:'Только начал(а)'},{v:'base',t:'Базовый',d:'Основы знаю'},{v:'mid',t:'Средний',d:'Уверенно пользуюсь'},{v:'pro',t:'Продвинутый',d:'Могу учить других'}];
+var LANGLEVELS = [{v:'a',t:'Начальный',d:'A1–A2'},{v:'b1',t:'Средний',d:'B1'},{v:'b2',t:'Уверенный',d:'B2'},{v:'c',t:'Свободный',d:'C1 и выше'}];
+var AGE_MIN = 10, AGE_MAX = 20;
+var SITTESTS = [
+  {q:'Тебе дали свободную неделю для проекта. Что выберешь?',o:[['Создать приложение или игру','tech'],['Провести эксперимент и узнать что-то новое','sci'],['Придумать бизнес и попробовать его запустить','biz'],['Создать дизайн, видео или другой творческий проект','art']]},
+  {q:'Какой школьный проект тебе было бы интереснее выполнить?',o:[['Сделать робота или техническое устройство','tech'],['Исследовать человека, животных или природу','sci'],['Разработать идею полезного бизнеса','biz'],['Снять фильм, создать дизайн или оформить проект','art']]},
+  {q:'Какая задача тебе кажется наиболее интересной?',o:[['Разобраться, как что-то работает','tech'],['Найти причину какого-то явления','sci'],['Придумать, как решить проблему людей','biz'],['Создать что-то красивое и необычное','art']]},
+  {q:'Если бы ты работал в команде, какую роль выбрал бы?',o:[['Программист / технический специалист','tech'],['Исследователь','sci'],['Руководитель / организатор','biz'],['Дизайнер / создатель контента','art']]},
+  {q:'Какой кружок ты бы выбрал?',o:[['Программирование или робототехника','tech'],['Научная лаборатория','sci'],['Бизнес и предпринимательство','biz'],['Дизайн, медиа или творчество','art']]},
+  {q:'Что приносит тебе больше удовлетворения?',o:[['Когда сложная задача наконец решена','tech'],['Когда я узнаю или доказываю что-то новое','sci'],['Когда моя идея заинтересовала других','biz'],['Когда у меня получился красивый результат','art']]},
+  {q:'Какую проблему тебе было бы интереснее решить?',o:[['Сделать технологию, которая упростит жизнь','tech'],['Решить научную или экологическую проблему','sci'],['Создать полезный продукт или бизнес','biz'],['Сделать продукт удобнее и красивее','art']]},
+  {q:'Что тебе было бы интереснее изучать?',o:[['Компьютеры, технологии и искусственный интеллект','tech'],['Человека, природу и науку','sci'],['Деньги, бизнес и экономику','biz'],['Искусство, дизайн, медиа и культуру','art']]},
+  {q:'Какой конкурс ты бы выбрал?',o:[['Хакатон или соревнование по технологиям','tech'],['Научная олимпиада или исследовательский конкурс','sci'],['Конкурс бизнес-идей','biz'],['Творческий конкурс','art']]},
+  {q:'Представь: через 5 лет ты уже хорошо умеешь что-то делать. Что бы это было?',o:[['Создавать технологии и приложения','tech'],['Проводить исследования и делать открытия','sci'],['Создавать и развивать собственные проекты','biz'],['Создавать профессиональные творческие работы','art']]}
+];
+var SECTIONS = [
+  {name:'Основная информация',desc:'Кто ты и где учишься'},
+  {name:'Учёба',desc:'Опиши каждый урок — так мы лучше узнаем, что тебе нравится'},
+  {name:'Интересы',desc:'Что тебя увлекает и кем себя видишь'},
+  {name:'Навыки и достижения',desc:'Что уже умеешь, твой уровень, победы и опыт'},
+  {name:'Хобби и свободное время',desc:'Чем занимаешься после школы'},
+  {name:'Предпочтения в работе',desc:'Какой формат деятельности твой'},
+  {name:'Карьерные интересы',desc:'Планы на будущее'},
+  {name:'Языки',desc:'Какими языками владеешь'},
+  {name:'Поступление',desc:'Куда хочешь поступать'}
+];
+
+function freshState(){ return {
+  name:'',instagram:'',age:'',grade:'',country:'',studyLang:'',schoolType:'',admitYear:'',knowCountry:'',knowCountryWhich:'',hasProfession:'',professionText:'',
+  subjects:[],subj:{},interests:[],situation:'',
+  progLangs:[],progExp:'',progProjects:'',medInterest:'',medLong:'',designTools:[],designPortfolio:'',
+  skills:[],skillLevel:{},freeText:'',
+  hobbies:[],hobbyHours:'',about:[],circles:'',
+  achievements:[],achDetail:'',
+  work:{},dreamJob:'',considerJobs:[],notJobs:[],career:{},
+  langs:[],langLevel:{},readyEnglish:'',newLang:'',newLangWhich:'',sittest:{},
+  sportAch:'',musicDone:'',clubsWhich:'',
+  chosenUni:null,chosenUnis:[],allPlans:{},allChecks:{},plan:null,planChecks:{},myAwards:[],
+  studyCountry:'',studyCountryWhich:'',cities:'',bigUni:'',dorm:'',grant:'',costImportant:'',relocate:'',englishMedium:'',exchange:'',
+  done:false }; }
+var S = freshState();
+var secIdx = 0, curQs = [], sitPos = 0;
+var LS = 'talapSurveyV1';
+var LS_OLD = ['locusSurveyV2','locusSurveyV1'];
+
+function save(){ try { localStorage.setItem(LS, JSON.stringify({state:S, sec:secIdx})); } catch(e){} }
+function load(){ try {
+  var raw = localStorage.getItem(LS), moved = false;
+  if(!raw){ for(var oi=0;oi<LS_OLD.length;oi++){ raw = localStorage.getItem(LS_OLD[oi]); if(raw){ moved = true; break; } } }
+  var d = JSON.parse(raw);
+  if(d && d.state){ S = Object.assign(freshState(), d.state); migrateState(); save(); if(moved){ try{ for(var oj=0;oj<LS_OLD.length;oj++) localStorage.removeItem(LS_OLD[oj]); }catch(e){} } return d.sec||0; }
+} catch(e){} return 0; }
+function migrateState(){
+  if(!S.chosenUnis) S.chosenUnis=[];
+  if(!S.allPlans) S.allPlans={};
+  if(!S.allChecks) S.allChecks={};
+  if(S.chosenUni && !S.chosenUnis.length) S.chosenUnis=[S.chosenUni];
+  if(S.chosenUnis.length && !S.chosenUni) S.chosenUni=S.chosenUnis[0];
+  if(S.plan&&((S.plan.steps||S.plan.uni)&&!S.plan.unis)){ S.plan=null; S.planChecks={}; }
+  if(S.plan&&S.plan.v!==2){ S.plan=null; S.planChecks={}; }
+  if(!S.planChecks||typeof S.planChecks!=='object') S.planChecks={};
+  if(!S.cal||typeof S.cal!=='object') S.cal={level:'years',y:null,m:null};
+}
+function store(){ try { localStorage.removeItem(LS); for(var i=0;i<LS_OLD.length;i++) localStorage.removeItem(LS_OLD[i]); localStorage.removeItem('talapTier'); localStorage.removeItem('locusTier'); } catch(e){} }
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('show'); },2200); }
+function has(arr,v){ return arr && arr.indexOf(v) !== -1; }
+function hasI(key){ return (S.interests||[]).some(function(v){ return v.indexOf(key)!==-1; }); }
+function opt(v,t,d){ return {v:v,t:t,d:d}; }
+function strOpts(list){ return list.map(function(v){ return {v:v,t:v}; }); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function needProg(){ return hasI('Компьютеры') || has(S.skills,'Программирование'); }
+function needMed(){ return hasI('Медицина'); }
+function needDesign(){ return hasI('Дизайн'); }
+
+/* возраст -> класс и год поступления */
+var GRADE_BY_AGE = {10:'6 класс',11:'6 класс',12:'7 класс',13:'8 класс',14:'9 класс',15:'10 класс',16:'11 класс',17:'11 класс',18:'12 класс (НИШ)',19:'12 класс (НИШ)',20:'12 класс (НИШ)'};
+function yearByGrade(g){
+  if(g==='11 класс'||g==='12 класс (НИШ)') return '2027';
+  if(g==='10 класс') return '2028';
+  return '2029 или позже';
+}
+function autoByAge(loud){
+  var g = GRADE_BY_AGE[parseInt(S.age,10)];
+  if(!g) return false;
+  var changed = false;
+  if(S.grade!==g){ S.grade=g; changed=true; }
+  var y = yearByGrade(g);
+  if(S.admitYear!==y){ S.admitYear=y; changed=true; }
+  if(changed){ save(); if(loud) toast('Класс и год поступления подставлены по возрасту — можно поменять'); }
+  return changed;
+}
+
+/* ================= Вопросы по разделам ================= */
+function buildQuestions(sec){
+  var a = [];
+  function p(q){ q.sec=sec; a.push(q); return q; }
+  if(sec===0){
+    p({id:'name',title:'Имя',type:'text',key:'name',ph:'Твоё имя',req:1});
+    p({id:'insta',title:'Твой Instagram',sub:'Ник без @ — покажем в новостях и профиле. Можно пропустить',type:'text',key:'instagram',ph:'никнейм',optional:1});
+    p({id:'age',title:'Возраст',sub:'Покрути вниз-вверх',type:'wheel',key:'age'});
+    p({id:'grade',title:'Класс',type:'single',key:'grade',options:strOpts(['6 класс','7 класс','8 класс','9 класс','10 класс','11 класс','12 класс (НИШ)'])});
+    p({id:'country',title:'Страна',type:'text',key:'country',ph:'Например, Казахстан'});
+    p({id:'schoolType',title:'Тип школы',type:'single',key:'schoolType',options:strOpts(['Обычная','НИШ','РФМШ / БИЛ','Лицей / гимназия','Частная','IB'])});
+    p({id:'admitYear',title:'Когда планируешь поступать в университет?',type:'single',key:'admitYear',options:strOpts(['2026','2027','2028','2029 или позже','Ещё не знаю'])});
+    p({id:'knowCountry',title:'Знаешь уже, в какой стране хочешь учиться?',type:'single',key:'knowCountry',restruct:1,options:[opt('yes','Да, уже знаю'),opt('no','Пока выбираю')]});
+    if(S.knowCountry==='yes')
+      p({id:'knowCountryWhich',title:'В какой стране?',type:'text',key:'knowCountryWhich',ph:'Например, США',req:1,fresh:1});
+    p({id:'hasProfession',title:'Есть уже выбранная профессия или направление?',type:'single',key:'hasProfession',restruct:1,options:[opt('yes','Да, уже выбрал(а)'),opt('options','Есть несколько вариантов'),opt('no','Пока нет')]});
+    if(S.hasProfession==='yes'||S.hasProfession==='options')
+      p({id:'professionText',title:S.hasProfession==='yes'?'Какая профессия?':'Какие варианты рассматриваешь?',type:'text',key:'professionText',ph:'Например, врач',optional:1,fresh:1});
+  }
+  if(sec===1){
+    SUBJECTS.forEach(function(s){ p({id:'subj:'+s,title:s,sub:'Опиши этот урок: оценка, интерес и сложность',type:'subjDetail',subject:s}); });
+  }
+  if(sec===2){
+    p({id:'interests',title:'Какие области тебе интересны?',sub:'Выбери всё, что откликается, или добавь своё последним вариантом',type:'multi',key:'interests',options:INTERESTS,custom:1,restruct:1,req:1});
+    p({id:'sittest',title:'Мини-тесты: выбери, что ближе',sub:'10 ситуаций — листай стрелками, отвечай тапом',type:'sittest'});
+    if(needMed()){
+      p({id:'medInterest',title:'Насколько тебе интересна медицина?',sub:'1 — совсем нет, 5 — очень',type:'scale',key:'medInterest',left:'Не интересно',right:'Очень'});
+      p({id:'medLong',title:'Готов(а) учиться 6+ лет ради профессии врача?',type:'single',key:'medLong',options:[opt('yes','Да, готов(а)'),opt('doubt','Сомневаюсь'),opt('no','Нет, это не для меня')]});
+    }
+    if(needDesign()){
+      p({id:'designTools',title:'Какими инструментами уже пользуешься?',sub:'Выбери всё, что пробовал(а)',type:'multi',key:'designTools',options:['Figma','Photoshop','Illustrator','Procreate','Canva','Blender','After Effects'],optional:1});
+      p({id:'designPortfolio',title:'Есть портфолио работ?',type:'single',key:'designPortfolio',options:[opt('yes','Да, есть'),opt('want','Нет, хочу собрать'),opt('no','Нет')]});
+    }
+  }
+  if(sec===3){
+    p({id:'skills',title:'Чем уже умеешь заниматься?',sub:'Выбери всё, что умеешь хотя бы на базовом уровне',type:'multi',key:'skills',options:SKILLS,restruct:1,req:1});
+    (S.skills||[]).forEach(function(s){ p({id:'skill:'+s,title:s,sub:'Твой уровень',type:'skillLevel',skill:s}); });
+    if(needProg()){
+      p({id:'progLangs',title:'Какие языки программирования знаешь?',sub:'Выбери всё, что пробовал(а)',type:'multi',key:'progLangs',options:['Python','JavaScript','Java','C++','C#','Go','Scratch'],optional:1});
+      p({id:'progExp',title:'Как долго программируешь?',type:'single',key:'progExp',options:[opt('0','Меньше 6 месяцев'),opt('1','Около года'),opt('2','2 года'),opt('3','3 года и больше')]});
+      p({id:'progProjects',title:'Есть свои проекты?',type:'single',key:'progProjects',options:[opt('yes','Да, есть свои проекты'),opt('want','Нет, но хочу сделать'),opt('no','Пока нет')]});
+    }
+    p({id:'freeText',title:'Расскажи своими словами, чем ты сейчас занимаешься',type:'textarea',key:'freeText',ph:'Например: делаю сайты на заказ и веду блог про дизайн...',optional:1});
+    p({id:'achievements',title:'Какие у тебя достижения?',sub:'Выбери всё, что было, или добавь своё вручную',type:'multi',key:'achievements',options:ACHS,custom:1,req:1});
+    p({id:'achDetail',title:'Расскажи подробнее о главном достижении',type:'textarea',key:'achDetail',ph:'Например: 2 место на областной олимпиаде по физике...',optional:1});
+  }
+  if(sec===4){
+    p({id:'hobbies',title:'Чем занимаешься после школы? Какие хобби?',sub:'Выбери или добавь своё',type:'multi',key:'hobbies',options:HOBBIES,custom:1,req:1});
+    var hobbyItems=[
+      {key:'hobbyHours',title:'Сколько времени в неделю уделяешь своим занятиям?',options:[opt('l2','Меньше 2 часов'),opt('24','2–4 часа'),opt('57','5–7 часов'),opt('8p','8+ часов')]},
+      {key:'about.sport',title:'Занимаешься ли спортом?',trig:1,options:[opt('yes','Да, регулярно'),opt('sometimes','Иногда'),opt('no','Нет')]},
+      {key:'about.music',title:'Занимаешься ли музыкой?',trig:1,options:[opt('yes','Да'),opt('was','Раньше занимался(лась)'),opt('no','Нет')]},
+      {key:'about.books',title:'Читаешь ли книги?',options:[opt('yes','Да, люблю читать'),opt('sometimes','Иногда'),opt('no','Почти нет')]},
+      {key:'about.clubs',title:'Участвуешь ли в клубах?',trig:1,options:[opt('yes','Да'),opt('no','Нет')]}
+    ];
+    var sp=getVal('about.sport');
+    if(sp==='yes'||sp==='sometimes') hobbyItems.push({key:'sportAch',title:'Есть спортивные достижения или звания? КМС, МС, разряды?',fresh:1,options:[opt('rank','Да — КМС / МС / разряд'),opt('medals','Есть медали и грамоты'),opt('none','Пока без званий')]});
+    var mu=getVal('about.music');
+    if(mu==='yes'||mu==='was') hobbyItems.push({key:'musicDone',title:'Что закончил по музыке?',fresh:1,type:'text',ph:'Например, музыкальную школу по фортепиано...'});
+    if(getVal('about.clubs')==='yes') hobbyItems.push({key:'clubsWhich',title:'В каких клубах участвуешь?',fresh:1,type:'text',ph:'Например, дебатный клуб, robotics...'});
+    p({id:'hobbyTest',title:'Мини-тест: твоё свободное время',sub:'Листай стрелками ← →, отвечай тапом',type:'carousel',items:hobbyItems});
+    p({id:'circles',title:'Какие кружки посещаешь?',sub:'Через запятую',type:'text',key:'circles',ph:'Например, робототехника, домбра...',optional:1});
+  }
+  if(sec===5){
+    p({id:'w_team',title:'Предпочитаешь работать один или в команде?',type:'single',key:'work.team',options:[opt('solo','Один'),opt('team','В команде'),opt('both','По-разному')]});
+    p({id:'w_people',title:'Нравится работать с людьми или с компьютером?',type:'single',key:'work.people',options:[opt('people','С людьми'),opt('pc','С компьютером'),opt('both','И то, и другое')]});
+    p({id:'w_practice',title:'Больше нравится практика или теория?',type:'single',key:'work.practice',options:[opt('prac','Практика — делать руками'),opt('theor','Теория — разбираться вглубь'),opt('both','Баланс')]});
+    var WQ=[['create','Нравится создавать что-то новое?'],['solve','Нравится решать сложные задачи?'],['analyze','Нравится анализировать информацию?'],['lead','Нравится руководить?'],['speak','Нравится выступать перед людьми?'],['help','Нравится помогать другим?'],['numbers','Нравится работать с цифрами?'],['texts','Нравится работать с текстами?'],['research','Нравится проводить исследования?'],['variety','Нравится, когда каждый день разные задачи?']];
+    WQ.forEach(function(w){ p({id:'w_'+w[0],title:w[1],type:'agree',key:'work.'+w[0]}); });
+  }
+  if(sec===6){
+    p({id:'dreamJob',title:'Кем хотел(а) бы стать?',type:'text',key:'dreamJob',ph:'Например, AI-инженер',optional:1});
+    p({id:'considerJobs',title:'Какие профессии рассматриваешь?',sub:'Выбери или добавь свою кнопкой +',type:'multi',key:'considerJobs',options:JOBS,custom:1,req:1});
+    p({id:'notJobs',title:'Какие профессии тебе не интересны?',sub:'Выбери или добавь свою кнопкой +. Можно пропустить',type:'multi',key:'notJobs',options:JOBS,custom:1,optional:1});
+    var CQ=[['kz','Хочешь работать в Казахстане?'],['abroad','Хочешь работать за границей?'],['remote','Хочешь работать удалённо?'],['business','Хочешь открыть собственный бизнес?'],['science','Хочешь заниматься наукой?'],['bigco','Хочешь работать в крупной компании?']];
+    var YN=[opt('yes','Да'),opt('no','Нет')];
+    CQ.forEach(function(w){ p({id:'c_'+w[0],title:w[1],type:'single',key:'career.'+w[0],options:YN}); });
+  }
+  if(sec===7){
+    p({id:'langs',title:'Какие языки знаешь?',sub:'Выбери все, на которых можешь общаться',type:'multi',key:'langs',options:LANGS,restruct:1,req:1});
+    (S.langs||[]).forEach(function(l){ p({id:'lang:'+l,title:l,sub:'Твой уровень',type:'langLevel',lang:l}); });
+    p({id:'newLang',title:'Хочешь изучать новый язык?',type:'single',key:'newLang',restruct:1,options:[opt('yes','Да'),opt('no','Нет')]});
+    if(S.newLang==='yes') p({id:'newLangWhich',title:'Какой язык хочешь выучить?',type:'text',key:'newLangWhich',ph:'Например, корейский',optional:1,fresh:1});
+  }
+  if(sec===8){
+    p({id:'studyCountry',title:'В какой стране хочешь учиться?',type:'single',key:'studyCountry',restruct:1,options:[opt('kz','🇰🇿 В Казахстане'),opt('abroad','🌍 За границей'),opt('undecided','Пока не решил(а)')]});
+    if(S.studyCountry==='abroad') p({id:'studyCountryWhich',title:'В какой стране?',type:'text',key:'studyCountryWhich',ph:'Например, США, Корея, Турция...',fresh:1});
+    p({id:'bigUni',title:'Важен ли большой университет?',sub:'1 — не важно, 5 — очень важно',type:'scale',key:'bigUni',left:'Не важно',right:'Очень важно'});
+    p({id:'grant',title:'Нужен грант или стипендия?',type:'single',key:'grant',options:[opt('only','Только грант'),opt('nice','Желательно'),opt('pay','Готов(а) платить')]});
+    p({id:'costImportant',title:'Насколько важна стоимость обучения?',sub:'1 — не важна, 5 — критична',type:'scale',key:'costImportant',left:'Не важна',right:'Критична'});
+    p({id:'relocate',title:'Готов(а) переехать в другой город или страну?',type:'single',key:'relocate',options:[opt('yes','Да, готов(а)'),opt('own','Только свой город'),opt('depends','Зависит от условий')]});
+    p({id:'exchange',title:'Интересуют международные программы и обмен?',type:'single',key:'exchange',options:[opt('very','Очень интересуют'),opt('mid','Интересно'),opt('no','Не важно')]});
+  }
+  return a;
+}
+
+function getVal(key){ var parts=key.split('.'); if(parts.length===1) return S[key];
+  if(parts.length===2){ if(key==='about.sport'||key==='about.music'||key==='about.books'||key==='about.clubs'){ if(!S.about||typeof S.about!=='object'||Array.isArray(S.about)) S.about={}; return S.about[parts[1]]; } return S[parts[0]]?S[parts[0]][parts[1]]:''; }
+  return ''; }
+function setVal(key,v){ var parts=key.split('.');
+  if(parts.length===1) S[key]=v;
+  else if(key.indexOf('about.')===0){ if(!S.about||typeof S.about!=='object'||Array.isArray(S.about)) S.about={}; S.about[parts[1]]=v; }
+  else { if(!S[parts[0]]) S[parts[0]]={}; S[parts[0]][parts[1]]=v; } }
+function isAnswered(q){
+  var v;
+  if(q.type==='subjDetail'){ var d=S.subj[q.subject]||{}; return d.grade&&d.like&&d.ease&&d.deep; }
+  if(q.type==='sittest'){ var tt=S.sittest||{}; return Object.keys(tt).length>=SITTESTS.length; }
+  if(q.type==='carousel'){ return q.items.every(function(it){ var v=getVal(it.key); return v!==''&&v!==undefined&&v!==null; }); }
+  if(q.type==='wheel'){ return !!S.age; }
+  if(q.type==='skillLevel'){ return !!S.skillLevel[q.skill]; }
+  if(q.type==='langLevel'){ return !!S.langLevel[q.lang]; }
+  if(!q.key) return true;
+  if(q.type==='multi'){ v=getVal(q.key); return v&&v.length>0; }
+  v=getVal(q.key);
+  return v!==''&&v!==undefined&&v!==null;
+}
+
+/* ================= Рендер раздела ================= */
+var stage=document.getElementById('stage'), stagewrap=document.getElementById('stagewrap'),
+    pfill=document.getElementById('pfill'), secName=document.getElementById('secName'),
+    stepCount=document.getElementById('stepCount'), btnNext=document.getElementById('btnNext');
+
+function blockHTML(q){
+  var req = (!q.optional && (q.req || q.type==='single' || q.type==='agree' || q.type==='scale' || q.type==='skillLevel' || q.type==='langLevel' || q.type==='subjDetail')) ? ' <span class="req">*</span>' : '';
+  var h = '<div class="qb'+(q.fresh?' qb-new':'')+'" id="qb_'+q.id+'"><div class="qlabel">'+esc(q.title)+req+'</div>';
+  if(q.sub) h += '<div class="qsub">'+esc(q.sub)+'</div>';
+  var val = q.key?getVal(q.key):'';
+
+  if(q.type==='wheel'){
+    h += '<div class="wheel-wrap"><div class="wheel" data-g="'+q.id+'"><div class="wheel-list">';
+    for(var wa=AGE_MIN;wa<=AGE_MAX;wa++) h += '<div class="wheel-item" data-i="'+(wa-AGE_MIN)+'">'+wa+'</div>';
+    h += '</div></div><div class="wheel-fade top"></div><div class="wheel-fade bot"></div><div class="wheel-hi"></div></div>';
+  }
+  else if(q.type==='text'||q.type==='number')
+    h += '<input class="field" data-f="'+q.id+'" type="'+(q.type==='number'?'number':'text')+'" inputmode="'+(q.type==='number'?'numeric':'text')+'" placeholder="'+esc(q.ph||'')+'" value="'+esc(val||'')+'">';
+  else if(q.type==='textarea')
+    h += '<textarea class="area" data-f="'+q.id+'" placeholder="'+esc(q.ph||'')+'">'+esc(val||'')+'</textarea>';
+  else if(q.type==='single'||q.type==='agree'||q.type==='skillLevel'||q.type==='langLevel'){
+    var opts = q.options || (q.type==='skillLevel'?LEVELS:(q.type==='langLevel'?LANGLEVELS:AGREE));
+    var cur = q.key?val:(q.type==='skillLevel'?(S.skillLevel[q.skill]||''):(S.langLevel[q.lang]||''));
+    h += '<div class="opts" data-g="'+q.id+'">' + opts.map(function(o){
+      return '<button class="opt'+(cur===o.v?' sel':'')+'" data-v="'+esc(o.v)+'"><span class="radio"></span><span>'+esc(o.t)+(o.d?'<small>'+esc(o.d)+'</small>':'')+'</span></button>';
+    }).join('') + '</div>';
+  }
+  else if(q.type==='scale'){
+    h += '<div class="scale5" data-g="'+q.id+'">' + [1,2,3,4,5].map(function(n){
+      return '<button data-v="'+n+'" class="'+(String(val)===String(n)?'sel':'')+'">'+n+'</button>';
+    }).join('') + '</div><div class="scalelabels"><span>'+esc(q.left||'1')+'</span><span>'+esc(q.right||'5')+'</span></div>';
+  }
+  else if(q.type==='multi'){
+    var preset=q.options||[], curArr=val||[];
+    var custom=curArr.filter(function(v){ return preset.indexOf(v)===-1; });
+    h += '<div class="chips" data-g="'+q.id+'">' + preset.concat(custom).map(function(v){
+      return '<div class="chip'+(has(curArr,v)?' sel':'')+'" data-v="'+esc(v)+'">'+esc(v)+'</div>';
+    }).join('') + '</div>';
+    if(q.custom) h += '<div class="addrow"><input class="field custom-in" data-c="'+q.id+'" placeholder="Своё — напиши и нажми +"><button class="addbtn" data-add="'+q.id+'">+</button></div>';
+  }
+  else if(q.type==='sittest'){
+    h += '<div class="sittest" data-g="'+q.id+'"></div>';
+  }
+  else if(q.type==='carousel'){
+    h += '<div class="minicar" data-c="'+q.id+'"></div>';
+  }
+  else if(q.type==='subjDetail'){
+    var d=S.subj[q.subject]||{};
+    function pills(k,vals){ return '<div class="pills" data-g="'+q.id+'" data-k="'+k+'">'+vals.map(function(g){
+      var vv=Array.isArray(g)?g[0]:g, tt=Array.isArray(g)?g[1]:g;
+      return '<button data-v="'+vv+'" class="'+(String(d[k])===String(vv)?'sel':'')+'">'+tt+'</button>'; }).join('')+'</div>'; }
+    h += '<div class="mini"><b>Текущая оценка</b>'+pills('grade',['2','3','4','5'])+'</div>';
+    h += '<div class="mini"><b>Насколько нравится? (1–5)</b>'+pills('like',['1','2','3','4','5'])+'</div>';
+    h += '<div class="mini"><b>Насколько легко даётся? (1–5)</b>'+pills('ease',['1','2','3','4','5'])+'</div>';
+    h += '<div class="mini"><b>Хочешь изучать глубже?</b>'+pills('deep',[['yes','Да'],['no','Нет']])+'</div>';
+  }
+  return h+'</div>';
+}
+
+function qById(id){ for(var i=0;i<curQs.length;i++) if(curQs[i].id===id) return curQs[i]; return null; }
+
+function renderSection(dir){
+  dir=dir||0;
+  curQs = buildQuestions(secIdx);
+  var sec = SECTIONS[secIdx];
+  secName.textContent = sec.name;
+  stepCount.textContent = 'Раздел '+(secIdx+1)+' из 9 • вопросов: '+curQs.length;
+  pfill.style.width = Math.round(secIdx/9*100)+'%';
+  document.getElementById('ticks').innerHTML = SECTIONS.map(function(s,ix){
+    return '<i class="'+(ix<secIdx?'done':ix===secIdx?'cur':'')+'"></i>';
+  }).join('');
+  btnNext.textContent = (secIdx===8)?'Завершить ✨':'Далее →';
+  var h = '<div class="sechead"><div class="n">Раздел '+(secIdx+1)+' / 9</div><h2>'+esc(sec.name)+'</h2><p>'+esc(sec.desc)+'</p></div>';
+  curQs.forEach(function(q){ h += blockHTML(q); });
+  h += '<div style="height:8px"></div>';
+  var st = stagewrap.scrollTop;
+  stage.innerHTML = h;
+  stagewrap.scrollTop = 0;
+  if(dir!==0){ stage.classList.remove('in-r','in-l'); void stage.offsetWidth; stage.classList.add(dir>0?'in-r':'in-l'); }
+  bindAll();
+}
+
+function bindAll(){
+  /* карусель мини-тестов */
+  stage.querySelectorAll('.sittest').forEach(function(box){
+    var q=qById(box.getAttribute('data-g')); if(!q) return;
+    if(!S.sittest) S.sittest={};
+    sitPos=firstUnansweredSit();
+    paintSit(box,q,0);
+  });
+  /* универсальные мини-карусели */
+  stage.querySelectorAll('.minicar').forEach(function(box){
+    var q=qById(box.getAttribute('data-c')); if(!q) return;
+    box._pos=firstUnansweredCar(q);
+    paintCar(box,q,0);
+  });
+  /* крутилка возраста */
+  stage.querySelectorAll('.wheel').forEach(function(g){
+    var q=qById(g.getAttribute('data-g')); if(!q) return;
+    var ITEM=44, list=g.querySelector('.wheel-list');
+    var items=list.querySelectorAll('.wheel-item');
+    function select(i){
+      i=Math.max(0,Math.min(items.length-1,i));
+      items.forEach(function(el,k){ el.classList.toggle('sel',k===i); });
+      var nv=String(AGE_MIN+i), ageChanged=(S.age!==nv), hadGrade=!!S.grade;
+      S.age=nv; save();
+      var box=document.getElementById('qb_'+q.id); if(box) box.classList.remove('err');
+      if(ageChanged && autoByAge(hadGrade)){ var st=stagewrap.scrollTop; renderSection(0); stagewrap.scrollTop=st; }
+    }
+    var cur=S.age?(parseInt(S.age,10)-AGE_MIN):(16-AGE_MIN);
+    if(isNaN(cur)) cur=16-AGE_MIN;
+    try{ g.scrollTop=cur*ITEM; }catch(e){}
+    select(cur);
+    var t=null;
+    g.addEventListener('scroll',function(){
+      clearTimeout(t);
+      t=setTimeout(function(){ select(Math.round(g.scrollTop/ITEM)); },90);
+    });
+    items.forEach(function(el){
+      el.addEventListener('click',function(){
+        var i=parseInt(el.getAttribute('data-i'),10);
+        select(i);
+        try{ if(g.scrollTo) g.scrollTo({top:i*ITEM,behavior:'smooth'}); else g.scrollTop=i*ITEM; }catch(e){ try{ g.scrollTop=i*ITEM; }catch(_){} }
+      });
+    });
+  });
+  /* текстовые поля */
+  stage.querySelectorAll('[data-f]').forEach(function(el){
+    el.addEventListener('input',function(){
+      var q=qById(el.getAttribute('data-f')); if(!q) return;
+      setVal(q.key, el.value); save();
+      document.getElementById('qb_'+q.id).classList.remove('err');
+    });
+  });
+  /* одиночный выбор */
+  stage.querySelectorAll('.opts, .scale5').forEach(function(g){
+    var q=qById(g.getAttribute('data-g')); if(!q) return;
+    g.querySelectorAll('[data-v]').forEach(function(b){
+      b.addEventListener('click',function(){
+        g.querySelectorAll('[data-v]').forEach(function(x){ x.classList.remove('sel'); });
+        b.classList.add('sel');
+        var v=b.getAttribute('data-v');
+        if(q.type==='scale') v=parseInt(v,10);
+        if(q.type==='skillLevel') S.skillLevel[q.skill]=v;
+        else if(q.type==='langLevel') S.langLevel[q.lang]=v;
+        else setVal(q.key,v);
+        save();
+        document.getElementById('qb_'+q.id).classList.remove('err');
+        if(q.restruct){ var st=stagewrap.scrollTop; renderSection(0); stagewrap.scrollTop=st; }
+      });
+    });
+  });
+  /* множественный выбор */
+  stage.querySelectorAll('.chips').forEach(function(g){
+    var q=qById(g.getAttribute('data-g')); if(!q) return;
+    g.querySelectorAll('.chip').forEach(function(c){
+      c.addEventListener('click',function(){
+        var v=c.getAttribute('data-v'), arr=getVal(q.key)||[];
+        if(has(arr,v)){ arr=arr.filter(function(x){ return x!==v; }); }
+        else arr.push(v);
+        setVal(q.key,arr); save();
+        c.classList.toggle('sel');
+        document.getElementById('qb_'+q.id).classList.remove('err');
+        if(q.restruct){ var st=stagewrap.scrollTop; renderSection(0); stagewrap.scrollTop=st; }
+      });
+    });
+  });
+  /* своё значение */
+  stage.querySelectorAll('[data-add]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var q=qById(btn.getAttribute('data-add')); if(!q) return;
+      var inp=stage.querySelector('[data-c="'+q.id+'"]'), v=inp.value.trim();
+      if(!v) return;
+      var arr=getVal(q.key)||[];
+      if(!has(arr,v)){ arr.push(v); setVal(q.key,arr); save(); }
+      renderSection(0);
+    });
+  });
+  /* детали предмета */
+  stage.querySelectorAll('.pills').forEach(function(g){
+    var q=qById(g.getAttribute('data-g')); if(!q||!q.subject) return;
+    var k=g.getAttribute('data-k');
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){
+        g.querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); });
+        b.classList.add('sel');
+        if(!S.subj[q.subject]) S.subj[q.subject]={};
+        var v=b.getAttribute('data-v');
+        S.subj[q.subject][k]=(k==='like'||k==='ease')?parseInt(v,10):v;
+        save();
+        document.getElementById('qb_'+q.id).classList.remove('err');
+      });
+    });
+  });
+}
+
+function firstUnansweredSit(){
+  if(!S.sittest) S.sittest={};
+  for(var i=0;i<SITTESTS.length;i++){ if(!S.sittest[i]) return i; }
+  return SITTESTS.length-1;
+}
+function paintSit(box,q,dir){
+  var t=SITTESTS[sitPos], ans=(S.sittest||{})[sitPos], i;
+  var h='<div class="sit-top"><button class="sit-arrow" data-sa="-1">←</button><div class="sit-count">Тест '+(sitPos+1)+' из '+SITTESTS.length+'</div><button class="sit-arrow" data-sa="1">→</button></div>';
+  h+='<div class="sit-q">'+esc(t.q)+'</div><div class="opts">'+t.o.map(function(o){
+    return '<button class="opt'+(ans===o[1]?' sel':'')+'" data-v="'+o[1]+'"><span class="radio"></span><span>'+esc(o[0])+'</span></button>';
+  }).join('')+'</div><div class="sit-dots">';
+  for(i=0;i<SITTESTS.length;i++){ var a=(S.sittest||{})[i]; h+='<i class="'+(a?'done':i===sitPos?'cur':'')+'"></i>'; }
+  h+='</div>';
+  box.innerHTML=h;
+  if(dir){ box.classList.remove('sit-r','sit-l'); void box.offsetWidth; box.classList.add(dir>0?'sit-r':'sit-l'); }
+  box.querySelectorAll('[data-sa]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var d=parseInt(b.getAttribute('data-sa'),10);
+      sitPos=(sitPos+d+SITTESTS.length)%SITTESTS.length;
+      paintSit(box,q,d);
+    });
+  });
+  box.querySelectorAll('.opt').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(!S.sittest) S.sittest={};
+      S.sittest[sitPos]=b.getAttribute('data-v'); save();
+      var qb=document.getElementById('qb_'+q.id); if(qb) qb.classList.remove('err');
+      if(sitPos<SITTESTS.length-1){ sitPos++; paintSit(box,q,1); }
+      else paintSit(box,q,0);
+    });
+  });
+}
+
+function firstUnansweredCar(q){
+  for(var i=0;i<q.items.length;i++){ var v=getVal(q.items[i].key); if(v===''||v===undefined||v===null) return i; }
+  return q.items.length-1;
+}
+function paintCar(box,q,dir){
+  var pos=box._pos||0, it=q.items[pos], ans=getVal(it.key);
+  var h='<div class="sit-top"><button class="sit-arrow" data-sa="-1">←</button><div class="sit-count">Вопрос '+(pos+1)+' из '+q.items.length+'</div><button class="sit-arrow" data-sa="1">→</button></div>';
+  h+='<div class="sit-q">'+esc(it.title)+'</div>';
+  if(it.type==='text'){
+    h+='<input class="field" data-car-in value="'+esc(ans||'')+'" placeholder="'+esc(it.ph||'')+'">';
+  } else {
+    h+='<div class="opts">'+it.options.map(function(o){
+      return '<button class="opt'+(ans===o.v?' sel':'')+'" data-v="'+esc(o.v)+'"><span class="radio"></span><span>'+esc(o.t)+'</span></button>';
+    }).join('')+'</div>';
+  }
+  h+='<div class="sit-dots">';
+  for(var i=0;i<q.items.length;i++){ var a=getVal(q.items[i].key); h+='<i class="'+((a!==''&&a!==undefined&&a!==null)?'done':i===pos?'cur':'')+'"></i>'; }
+  h+='</div>';
+  box.innerHTML=h;
+  if(dir){ box.classList.remove('sit-r','sit-l'); void box.offsetWidth; box.classList.add(dir>0?'sit-r':'sit-l'); }
+  box.querySelectorAll('[data-sa]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var d=parseInt(b.getAttribute('data-sa'),10);
+      box._pos=(pos+d+q.items.length)%q.items.length;
+      paintCar(box,q,d);
+    });
+  });
+  var inp=box.querySelector('[data-car-in]');
+  if(inp) inp.addEventListener('input',function(){
+    setVal(it.key,inp.value); save();
+    var qb=document.getElementById('qb_'+q.id); if(qb) qb.classList.remove('err');
+    paintDots(box,q);
+  });
+  box.querySelectorAll('.opt').forEach(function(b){
+    b.addEventListener('click',function(){
+      setVal(it.key,b.getAttribute('data-v')); save();
+      var qb=document.getElementById('qb_'+q.id); if(qb) qb.classList.remove('err');
+      if(it.trig){
+        if(!(S.about.sport==='yes'||S.about.sport==='sometimes')) S.sportAch='';
+        if(!(S.about.music==='yes'||S.about.music==='was')) S.musicDone='';
+        if(S.about.clubs!=='yes') S.clubsWhich='';
+        save();
+        var st=stagewrap.scrollTop; renderSection(0); stagewrap.scrollTop=st; return;
+      }
+      if(pos<q.items.length-1){ box._pos=pos+1; paintCar(box,q,1); }
+      else paintCar(box,q,0);
+    });
+  });
+}
+function paintDots(box,q){
+  var dots=box.querySelector('.sit-dots'); if(!dots) return;
+  var pos=box._pos||0, h='';
+  for(var i=0;i<q.items.length;i++){ var a=getVal(q.items[i].key); h+='<i class="'+((a!==''&&a!==undefined&&a!==null)?'done':i===pos?'cur':'')+'"></i>'; }
+  dots.innerHTML=h;
+}
+
+/* ================= Навигация ================= */
+function animate(dir){ stage.classList.remove('in-r','in-l'); void stage.offsetWidth; stage.classList.add(dir>0?'in-r':'in-l'); }
+function goNext(){
+  var missing=[];
+  curQs.forEach(function(q){ if(!q.optional && !isAnswered(q)) missing.push(q); });
+  if(missing.length){
+    var first=document.getElementById('qb_'+missing[0].id);
+    curQs.forEach(function(q){ var el=document.getElementById('qb_'+q.id); if(el) el.classList.remove('err'); });
+    missing.forEach(function(q){ var el=document.getElementById('qb_'+q.id); if(el) el.classList.add('err'); });
+    if(first){ if(first.scrollIntoView) first.scrollIntoView({behavior:'smooth',block:'center'}); first.classList.remove('shake'); void first.offsetWidth; first.classList.add('shake'); }
+    toast('Осталось ответить: '+missing.length);
+    return;
+  }
+  if(secIdx>=8){ showLoading(); return; }
+  secIdx++; save(); renderSection(1);
+}
+function goBack(){
+  if(secIdx<=0){ showTab('main'); return; }
+  secIdx--; save(); renderSection(-1);
+}
+document.getElementById('btnNext').addEventListener('click',goNext);
+document.getElementById('btnSkipSec').addEventListener('click',function(){
+  if(secIdx>=8){ showLoading(); return; }
+  secIdx++; save(); renderSection(1);
+});
+document.getElementById('btnBack').addEventListener('click',goBack);
+document.getElementById('btnBack2').addEventListener('click',goBack);
+
+/* ================= Экраны ================= */
+var vs=document.getElementById('view-survey'), vr=document.getElementById('view-result'), vl=document.getElementById('view-loading');
+var vm2=document.getElementById('view-main'), vc2=document.getElementById('view-cal'), vsoon=document.getElementById('view-awards');
+function show(el){ [vs,vr,vl,vm2,vc2,vsoon].forEach(function(x){ x.hidden=(x!==el); }); }
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active',b.getAttribute('data-tab')===t); });
+  if(t==='main'){ renderMain(); renderCal(); show(vm2); }
+  else if(t==='cal'){ renderCal(); show(vc2); }
+  else if(t==='awards'||t==='soon'){ renderAwards(); show(vsoon); }
+  else if(t==='survey'){ show(vs); renderSection(0); }
+}
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click',function(){ showTab(b.getAttribute('data-tab')); });
+});
+
+/* ================= Loading screen ================= */
+var EMBLEMS=[
+  {t:'H',bg:'#A41034',c:'#ffffff'},
+  {t:'MIT',bg:'#1a1a1a',c:'#ffffff',fs:10},
+  {t:'S',bg:'#8C1515',c:'#ffffff'},
+  {t:'O',bg:'#002147',c:'#ffffff'},
+  {t:'C',bg:'#A3C1AD',c:'#0b3d2e'},
+  {t:'Y',bg:'#00356B',c:'#ffffff'},
+  {t:'P',bg:'#FF8F00',c:'#ffffff'},
+  {t:'C',bg:'#B9D9EB',c:'#00356B'}
+];
+var RSTOPS=[['#FF9A44',0],['#FF5E8A',0.35],['#8B5CF6',0.7],['#00C2FF',1]];
+function hx(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function ringColor(t){
+  for(var i=0;i<RSTOPS.length-1;i++){
+    var a=RSTOPS[i], b=RSTOPS[i+1];
+    if(t>=a[1]&&t<=b[1]){ var k=(t-a[1])/((b[1]-a[1])||1), ca=hx(a[0]), cb=hx(b[0]);
+      return 'rgb('+Math.round(ca[0]+(cb[0]-ca[0])*k)+','+Math.round(ca[1]+(cb[1]-ca[1])*k)+','+Math.round(ca[2]+(cb[2]-ca[2])*k)+')'; }
+  }
+  return RSTOPS[RSTOPS.length-1][0];
+}
+function buildRing(){
+  var ring=document.getElementById('ring');
+  ring.querySelectorAll('.dot,.emb').forEach(function(e){ e.remove(); });
+  var N=60, DUR=2.6, ei=0;
+  var embAt={}; EMBLEMS.forEach(function(u,k){ embAt[Math.round(k*N/EMBLEMS.length)]=u; });
+  for(var i=0;i<N;i++){
+    var a=i/N*Math.PI*2-Math.PI/2;
+    var x=50+44*Math.cos(a), y=50+44*Math.sin(a);
+    var delay=(i/N*DUR).toFixed(2)+'s';
+    if(embAt[i]!==undefined){
+      var u=embAt[i], d=document.createElement('div');
+      d.className='emb'; d.textContent=u.t;
+      d.style.left=x+'%'; d.style.top=y+'%';
+      d.style.background=u.bg; d.style.color=u.c;
+      if(u.fs) d.style.fontSize=u.fs+'px';
+      d.style.animationDelay=delay;
+      ring.appendChild(d);
+    } else {
+      var s=document.createElement('div');
+      s.className='dot'; s.style.left=x+'%'; s.style.top=y+'%';
+      s.style.background=ringColor((Math.sin(a)+1)/2);
+      s.style.animationDelay=delay;
+      ring.appendChild(s);
+    }
+  }
+}
+var loadTimer=null, loadSubTimer=null;
+function showLoading(){
+  show(vl);
+  buildRing();
+  var subs=['Читаем твои ответы…','Спрашиваем ИИ…','Считаем совпадения…','Подбираем университеты…'], si=0;
+  var subEl=document.getElementById('loadSub'); subEl.textContent=subs[0];
+  clearInterval(loadSubTimer);
+  loadSubTimer=setInterval(function(){ si=(si+1)%subs.length; subEl.textContent=subs[si]; },1100);
+  clearTimeout(loadTimer);
+  AI_UNIS=null; AI_ERR=null;
+  var t0=Date.now(), settled=false;
+  function done(){
+    if(settled) return; settled=true;
+    clearInterval(loadSubTimer);
+    var wait=Math.max(0,3200-(Date.now()-t0));
+    loadTimer=setTimeout(finish,wait);
+  }
+  try{
+    var timeoutP=new Promise(function(_,rej){ setTimeout(function(){ rej(new Error('timeout')); },30000); });
+    Promise.race([fetchTierList(),timeoutP]).then(function(list){
+      AI_UNIS=list;
+      try{ localStorage.setItem('talapTier',JSON.stringify(list)); }catch(e){}
+      done();
+    }).catch(function(e){ AI_ERR=String(e&&e.message||e); done(); });
+  }catch(e){ AI_ERR=String(e); done(); }
+}
+
+/* ================= Фото университетов ================= */
+var UNI_FALLBACK = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Colorful_chairs_in_Harvard_Yard.JPG/960px-Colorful_chairs_in_Harvard_Yard.JPG';
+var UNI_PHOTOS = [
+  {k:['harvard','гарвард'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/Colorful_chairs_in_Harvard_Yard.JPG/960px-Colorful_chairs_in_Harvard_Yard.JPG'},
+  {k:['mit','массачусетс'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Great_dome_of_MIT%2C_Feb_2021.jpg/960px-Great_dome_of_MIT%2C_Feb_2021.jpg'},
+  {k:['stanford','стенфорд'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Stanford_Memorial_Church_October_2019_HDR.jpg/960px-Stanford_Memorial_Church_October_2019_HDR.jpg'},
+  {k:['oxford','оксфорд'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Radcliffe_Camera_Oxford_2018_03.jpg/960px-Radcliffe_Camera_Oxford_2018_03.jpg'},
+  {k:['cambridge','кембридж'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/20130215_Kings_College_Chapel_Hi-res_01.jpg/960px-20130215_Kings_College_Chapel_Hi-res_01.jpg'},
+  {k:['yale','йель','ейл'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Sterling_Memorial_Library_seen_from_the_front%2C_Yale_University%2C_New_Haven%2C_Connecticut.jpg/960px-Sterling_Memorial_Library_seen_from_the_front%2C_Yale_University%2C_New_Haven%2C_Connecticut.jpg'},
+  {k:['princeton','принстон'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Nassau_Hall_Princeton.JPG/960px-Nassau_Hall_Princeton.JPG'},
+  {k:['columbia','колумби'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Low_Memorial_Library_Columbia_University_NYC_retouched.jpg/960px-Low_Memorial_Library_Columbia_University_NYC_retouched.jpg'},
+  {k:['nazarbayev','назарбаев'],u:'https://thumb.wikimedia.org/wikipedia/en/thumb/c/ca/NU_Building.jpg/960px-NU_Building.jpg'},
+  {k:['kbtu','кбту','british technical','британ'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Kazakh-British_Technical_University%2C_Almaty_%28P1180218%29.jpg/960px-Kazakh-British_Technical_University%2C_Almaty_%28P1180218%29.jpg'},
+  {k:['iitu','муит','information technology university','информационных технологий'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/International_Information_Technology_University_in_Almaty.jpg/960px-International_Information_Technology_University_in_Almaty.jpg'},
+  {k:['sdu','сду','demirel','демирель','сулейман'],u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/SDU_Station_02.jpg/960px-SDU_Station_02.jpg'},
+  {k:['kaznu','казну','al-farabi','аль-фараби'],u:'https://upload.wikimedia.org/wikipedia/commons/c/c9/Main_building_of_KazNU.jpg'},
+  {k:['satbayev','satpaev','сатбаев','сатпаев'],u:'https://upload.wikimedia.org/wikipedia/commons/6/6d/Satbayev_University.jpg'}
+];
+function uniPhoto(name){
+  var n=String(name||'').toLowerCase();
+  for(var i=0;i<UNI_PHOTOS.length;i++){ var e=UNI_PHOTOS[i];
+    for(var j=0;j<e.k.length;j++) if(n.indexOf(e.k[j])!==-1) return e.u; }
+  return '';
+}
+function uniNoImgHTML(){ return '<div class="uni-noimg"><span>🎓</span></div>'; }
+function uniCardPhotoHTML(name){
+  var url=uniPhoto(name);
+  if(url) return '<div class="uniphoto">'+uniNoImgHTML()+'<img src="'+url+'" alt="'+esc(name)+'" loading="lazy" onerror="this.remove()"></div>';
+  return '<div class="uniphoto">'+uniNoImgHTML()+'</div>';
+}
+function uniTopPhotoHTML(name){
+  var url=uniPhoto(name);
+  if(url) return '<div class="uphoto">'+uniNoImgHTML()+'<img src="'+url+'" alt="" onerror="this.remove()"><button class="uclose" id="uclose">✕</button></div>';
+  return '<div class="uphoto">'+uniNoImgHTML()+'<button class="uclose" id="uclose">✕</button></div>';
+}
+
+/* ================= ИИ-тирлист (через свой бэкенд /api/gemini) ================= */
+var GEMINI_MODELS = ['gemini-3.6-flash','gemma-4-31b-it'];
+var AI_UNIS = null, AI_ERR = null;
+
+function profileText(){
+  var L = [];
+  function r(t,v){ if(v&&(v.length||typeof v==='number')) L.push(t+': '+(Array.isArray(v)?v.join(', '):v)); }
+  r('Имя',S.name); r('Возраст',S.age); r('Класс',S.grade); r('Страна',S.country);
+  r('Школа',S.schoolType); r('Поступление',S.admitYear);
+  r('Знает страну учёбы',(S.knowCountry==='yes'?'да':'нет')+(S.knowCountryWhich?' ('+S.knowCountryWhich+')':''));
+  r('Профессия',S.professionText||S.dreamJob);
+  var subs=Object.keys(S.subj||{}).map(function(s){ var d=S.subj[s];
+    return s+' (оценка '+d.grade+', нравится '+d.like+'/5, лёгкость '+d.ease+'/5'+(d.deep==='yes'?'; хочет глубже':'')+')'; });
+  if(subs.length) L.push('Предметы: '+subs.join('; '));
+  r('Интересы',S.interests);
+  var tc={tech:0,sci:0,biz:0,art:0};
+  Object.keys(S.sittest||{}).forEach(function(k){ var t=S.sittest[k]; if(tc[t]!==undefined) tc[t]++; });
+  L.push('Мини-тесты (10): технологии '+tc.tech+', наука '+tc.sci+', бизнес '+tc.biz+', творчество '+tc.art);
+  var sk=(S.skills||[]).map(function(s){ return s+' ('+({new:'начинающий',base:'базовый',mid:'средний',pro:'продвинутый'}[S.skillLevel[s]]||'?')+')'; });
+  if(sk.length) L.push('Навыки: '+sk.join(', '));
+  r('Языки программирования',S.progLangs);
+  r('Стаж в программировании',S.progExp); r('Проекты',S.progProjects);
+  r('Интерес к медицине (1-5)',S.medInterest); r('Готов учиться 6+ лет',S.medLong);
+  r('Инструменты дизайна',S.designTools); r('Портфолио',S.designPortfolio);
+  r('О себе',S.freeText);
+  r('Хобби',S.hobbies); r('Часов в неделю',S.hobbyHours);
+  if(S.about&&typeof S.about==='object'&&!Array.isArray(S.about)) L.push('Спорт/музыка/книги/клубы: '+Object.keys(S.about).map(function(k){ return k+'='+S.about[k]; }).join(', '));
+  r('Спортивные звания',S.sportAch); r('Музыка (что закончил)',S.musicDone); r('Клубы',S.clubsWhich);
+  r('Кружки',S.circles);
+  r('Достижения',S.achievements); r('Главное достижение',S.achDetail);
+  if(S.myAwards&&S.myAwards.length){
+    L.push('Портфолио из вкладки Достижения (чего УЖЕ добился): '+S.myAwards.map(function(a){
+      return '['+(a.sphere||'?')+'] '+a.title+' — '+(a.result||'')+(a.year?', '+a.year:'')+(a.format?', '+a.format:'')+(a.desc?'. '+a.desc:'');
+    }).join(' | '));
+  }
+  var w=S.work||{};
+  L.push('Работа: '+(w.team==='solo'?'один':w.team==='team'?'команда':'по-разному')+', '+(w.people==='people'?'с людьми':w.people==='pc'?'с компьютером':'и то и другое')+', '+(w.practice==='prac'?'практика':w.practice==='theor'?'теория':'баланс'));
+  ['create','solve','analyze','lead','speak','help','numbers','texts','research','variety'].forEach(function(k){ if(w[k]) L.push('  - '+k+': '+w[k]); });
+  r('Мечта',S.dreamJob); r('Рассматривает',S.considerJobs); r('Не интересны',S.notJobs);
+  var c=S.career||{};
+  L.push('Карьера: KZ='+(c.kz||'?')+', abroad='+(c.abroad||'?')+', remote='+(c.remote||'?')+', business='+(c.business||'?')+', science='+(c.science||'?')+', bigco='+(c.bigco||'?'));
+  var ll=(S.langs||[]).map(function(l){ return l+' ('+({a:'начальный',b1:'средний',b2:'уверенный',c:'свободный'}[S.langLevel[l]]||'?')+')'; });
+  if(ll.length) L.push('Языки: '+ll.join(', '));
+  r('Хочет выучить',S.newLangWhich);
+  r('Страна учёбы',(S.studyCountry==='kz'?'Казахстан':S.studyCountry==='abroad'?'заграница':'не решил')+(S.studyCountryWhich?' ('+S.studyCountryWhich+')':''));
+  r('Важен большой вуз (1-5)',S.bigUni); r('Грант',S.grant); r('Важность цены (1-5)',S.costImportant);
+  r('Готов к переезду',S.relocate); r('Программы обмена',S.exchange);
+  try{ L.push('Наш скоринг топ-3: '+scoreDirs().slice(0,3).map(function(d){ return d.name+' '+d.pct+'%'; }).join(', ')); }catch(e){}
+  return L.join('\n');
+}
+
+function normTier(t){
+  var s=String(t||'').toUpperCase().trim();
+  if(s.indexOf('DREAM')!==-1||s.indexOf('МЕЧТ')!==-1) return 'DREAM';
+  if(s.indexOf('TARGET')!==-1||s.indexOf('ЦЕЛ')!==-1) return 'TARGET';
+  if(s.indexOf('SAFETY')!==-1||s.indexOf('СТРАХ')!==-1||s.indexOf('ЗАПАС')!==-1) return 'SAFETY';
+  if(s==='S'||s==='D') return 'DREAM';
+  if(s==='A'||s==='T') return 'TARGET';
+  return 'SAFETY';
+}
+
+function aiPrompt(){
+  return 'Ты — эксперт по поступлению в университеты мира и Казахстана. Внимательно изучи профиль школьника и составь тирлист из РОВНО 20 подходящих университетов.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nПРАВИЛА:\n- Всего РОВНО 20 вузов: 5 Dream (мечта — топовые, сложно поступить), 9 Target (целевые — реальный шанс), 6 Safety (страховочные — почти гарантированно).\n- Тирлист ВСЕГДА смешанный: обязательно включи И вузы Казахстана (НУ, КБТУ, МУИТ, SDU, КазНУ, Сатпаев, AITU, ЕНУ, КИМЭП и др.), И зарубежные топ-вузы по направлению (MIT, Stanford, Oxford, Cambridge, Harvard, KAIST, Toronto, METU и другие по смыслу).\n- Если хочет учиться за границей в конкретной стране — большинство бери из этой страны, но 2-3 казахстанских оставь как запасной вариант. Если Казахстан — вузы РК + зарубежные как цель.\n- Учитывай интересы, оценки, грант/бюджет, язык, готовность к переезду.\n- Верни СТРОГО JSON без пояснений: {"universities":[{"tier":"DREAM","name":"...","place":"Город, страна","match":95,"reason":"..."}]}.\n- tier — строго одно из: "DREAM" (ровно 5), "TARGET" (ровно 9), "SAFETY" (ровно 6). match — 0-100 (Dream 90+, Target 78-92, Safety 65-80).\n- reason — 1-2 предложения на русском, почему подходит именно этому школьнику.';
+}
+
+function modelJSON(model,prompt){
+  return fetch('/api/gemini',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:model,prompt:prompt})
+  }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(function(j){
+    var parts=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[];
+    var t=parts.filter(function(p){ return !p.thought; }).map(function(p){ return p.text||''; }).join('');
+    var m=t.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('no json');
+    return JSON.parse(m[0]);
+  });
+}
+
+function callModel(model,prompt){
+  return modelJSON(model,prompt).then(function(o){
+    var list=o.universities||o.tiers||[];
+    if(!list.length) throw new Error('empty');
+    var norm=list.map(function(u){
+      return {tier:normTier(u.tier),name:u.name||'—',place:u.place||'',match:Math.max(0,Math.min(100,parseInt(u.match,10)||70)),reason:u.reason||''};
+    }).filter(function(u){ return u.name && u.name!=='—'; });
+    var dreams=norm.filter(function(u){ return u.tier==='DREAM'; }).slice(0,5);
+    var targets=norm.filter(function(u){ return u.tier==='TARGET'; }).slice(0,9);
+    var safeties=norm.filter(function(u){ return u.tier==='SAFETY'; }).slice(0,6);
+    var out=dreams.concat(targets,safeties);
+    if(out.length<10) throw new Error('too few');
+    var seen={}, res=[];
+    out.forEach(function(u){ var k=u.name.toLowerCase(); if(!seen[k]){ seen[k]=1; res.push(u); } });
+    try{
+      var fb=fallbackTier();
+      for(var i=0;i<fb.length&&res.length<20;i++){ var f=fb[i], k2=String(f.name).toLowerCase(); if(!seen[k2]){ seen[k2]=1; res.push(f); } }
+    }catch(e){}
+    return res.slice(0,20);
+  });
+}
+
+function fetchTierList(){
+  var prompt=aiPrompt(), i=0;
+  function next(){
+    if(i>=GEMINI_MODELS.length) return Promise.reject(new Error('all models failed'));
+    var m=GEMINI_MODELS[i++];
+    return callModel(m,prompt).catch(function(){ return next(); });
+  }
+  return next();
+}
+
+/* ---------- Детали поступления в вуз ---------- */
+var UNI_CACHE = {};
+function uniDetailPrompt(u){
+  return 'Ты — эксперт по поступлению. Школьник рассматривает университет "'+u.name+'" ('+u.place+').\n\nПРОФИЛЬ ШКОЛЬНИКА:\n'+profileText()+'\n\nВерни СТРОГО JSON без пояснений: {"ielts":"...","grades":"...","exams":"...","activities":["...","...","..."],"grants":"...","deadlines":"...","tips":["...","..."]}.\n- ielts: какой IELTS/TOEFL нужен (конкретные баллы).\n- grades: какие оценки/ЕНТ нужны.\n- exams: какие экзамены/тесты сдавать.\n- activities: 3-4 конкретные активности именно в сфере школьника (его интересы и направление из профиля), которые усилят заявку.\n- grants: какие гранты/скидки реальны для него.\n- deadlines: когда подавать документы.\n- tips: 2-3 коротких совета.\nВсё на русском, конкретно, без воды.';
+}
+function fetchUniDetail(u){
+  if(UNI_CACHE[u.name]) return Promise.resolve(UNI_CACHE[u.name]);
+  var prompt=uniDetailPrompt(u), i=0;
+  function next(){
+    if(i>=GEMINI_MODELS.length) return Promise.reject(new Error('all models failed'));
+    var m=GEMINI_MODELS[i++];
+    return Promise.resolve().then(function(){ return modelJSON(m,prompt); }).then(function(o){
+      if(!o.ielts&&!o.activities) throw new Error('empty');
+      UNI_CACHE[u.name]=o; return o;
+    }).catch(function(){ return next(); });
+  }
+  return next();
+}
+/* ---------- Отзывы о вузе + Reddit ---------- */
+var REVIEW_CACHE = {};
+function redditURL(u){
+  return 'https://www.reddit.com/search/?q='+encodeURIComponent(u.name+' university review')+'&sort=relevance';
+}
+function reviewPrompt(u){
+  return 'Ты — сборник отзывов студентов. Университет "'+u.name+'" ('+u.place+').\n\nВерни СТРОГО JSON без пояснений: {"reviews":[{"name":"...","text":"...","rating":5}]}.\n- 3 коротких живых отзыва студентов на русском, как на Reddit: имя + курс (например "Айгерим, 2 курс").\n- text — 1-2 предложения: что нравится / что бесит (общага, нагрузка, преподы, гранты).\n- rating — 1-5. Сделай разные: один 5, один 4, один 3.\nТолько JSON.';
+}
+function fallbackReviews(u){
+  var n=u.name||'этот вуз';
+  return [
+    {name:'Студент, 2 курс',text:'Учусь в '+n+' — нагрузка серьёзная, но преподы сильные и комьюнити классное.',rating:5},
+    {name:'Студентка, 1 курс',text:'Поступить было непросто, зато грант покрыл всё. Общага так себе, но учёба нравится.',rating:4},
+    {name:'Выпускник',text:'Диплом '+n+' реально помогает с работой, хотя дедлайны жёсткие. Советую только если готов(а) пахать.',rating:4}
+  ];
+}
+function starsHTML(r){
+  r=Math.max(1,Math.min(5,parseInt(r,10)||5));
+  var s=''; for(var i=0;i<5;i++) s+=(i<r?'★':'☆');
+  return s;
+}
+function reviewsHTML(list){
+  return list.map(function(r){
+    return '<div class="rev"><b>'+esc(r.name||'Студент')+'</b><div class="stars">'+starsHTML(r.rating)+'</div><p>'+esc(r.text||'')+'</p></div>';
+  }).join('');
+}
+function fetchUniReviews(u){
+  if(REVIEW_CACHE[u.name]) return Promise.resolve(REVIEW_CACHE[u.name]);
+  var i=0;
+  function next(){
+    if(i>=GEMINI_MODELS.length){ var fb=fallbackReviews(u); REVIEW_CACHE[u.name]=fb; return Promise.resolve(fb); }
+    var m=GEMINI_MODELS[i++];
+    return Promise.resolve().then(function(){ return modelJSON(m,reviewPrompt(u)); }).then(function(o){
+      if(!o.reviews||!o.reviews.length) throw new Error('empty');
+      var list=o.reviews.slice(0,3).map(function(r){ return {name:String(r.name||'Студент'),text:String(r.text||''),rating:Math.max(1,Math.min(5,parseInt(r.rating,10)||5))}; });
+      REVIEW_CACHE[u.name]=list; return list;
+    }).catch(function(){ return next(); });
+  }
+  return next();
+}
+function renderReviewsInto(u){
+  var box=document.getElementById('ureviews');
+  if(!box) return;
+  fetchUniReviews(u).then(function(list){
+    var b2=document.getElementById('ureviews');
+    if(b2) b2.innerHTML=reviewsHTML(list);
+  }).catch(function(){
+    var b3=document.getElementById('ureviews');
+    if(b3) b3.innerHTML=reviewsHTML(fallbackReviews(u));
+  });
+}
+function currentTierList(){
+  var raw=(AI_UNIS&&AI_UNIS.length)?AI_UNIS:fallbackTier();
+  return raw.map(function(u){ return {tier:normTier(u.tier),name:u.name,place:u.place,match:u.match,reason:u.reason}; });
+}
+function openUni(name){
+  var u=currentTierList().filter(function(x){ return x.name===name; })[0]||{name:name,place:'',match:0,reason:''};
+  var modal=document.getElementById('uniModal'), body=document.getElementById('uniBody');
+  modal.classList.add('open');
+  body.innerHTML=uniTopPhotoHTML(u.name)
+    +'<div class="ubody"><h3>'+esc(u.name)+'</h3><div class="place">'+esc(u.place)+'</div>'
+    +'<div class="uspinner"><div class="spin"></div>ИИ собирает требования…</div></div>';
+  document.getElementById('uclose').onclick=closeUni;
+  fetchUniDetail(u).then(function(d){
+    function li(arr){ return (arr||[]).map(function(x,i){ return '<div><b>'+(i+1)+'.</b> '+esc(x)+'</div>'; }).join(''); }
+    var picked=isPicked(u.name);
+    body.innerHTML=uniTopPhotoHTML(u.name)
+      +'<div class="ubody"><h3>'+esc(u.name)+'</h3><div class="place">'+esc(u.place)+(u.match?' • '+u.match+'% совпадение':'')+'</div>'
+      +'<div class="usec">Что нужно</div>'
+      +'<div class="ureq"><div class="k">IELTS</div><div class="v">'+esc(d.ielts||'—')+'</div></div>'
+      +'<div class="ureq"><div class="k">Оценки</div><div class="v">'+esc(d.grades||'—')+'</div></div>'
+      +'<div class="ureq"><div class="k">Экзамены</div><div class="v">'+esc(d.exams||'—')+'</div></div>'
+      +'<div class="usec">Активности в твоей сфере</div><div class="ulist">'+li(d.activities)+'</div>'
+      +'<div class="usec">Гранты</div><div class="ureq"><div class="k">Деньги</div><div class="v">'+esc(d.grants||'—')+'</div></div>'
+      +'<div class="ureq"><div class="k">Дедлайны</div><div class="v">'+esc(d.deadlines||'—')+'</div></div>'
+      +'<div class="usec">Советы</div><div class="ulist">'+li(d.tips)+'</div>'
+      +'<div class="usec">Отзывы студентов</div><div id="ureviews"><div class="uspinner"><div class="spin"></div>Загружаем отзывы…</div></div>'
+      +'<a class="redditbtn" href="'+redditURL(u)+'" target="_blank" rel="noopener">Читать отзывы на Reddit →</a>'
+      +'<button class="choosebtn'+(picked?' picked':'')+'" id="uchoose">'+(picked?'✓ Выбран — убрать из списка':'＋ Добавить к выбранным')+'</button>'
+      +'<button class="btn" id="ugoplan" style="margin-top:10px">К плану с выбранными ('+getChosen().length+') →</button></div>';
+    document.getElementById('uclose').onclick=closeUni;
+    document.getElementById('uchoose').onclick=function(){ toggleUni(u.name,u.place); openUniRefreshBtn(u); };
+    document.getElementById('ugoplan').onclick=function(){ continueWithChosen(); };
+    renderReviewsInto(u);
+  }).catch(function(){
+    var picked2=isPicked(u.name);
+    body.innerHTML=uniTopPhotoHTML(u.name)
+      +'<div class="ubody"><h3>'+esc(u.name)+'</h3><div class="place">'+esc(u.place)+'</div>'
+      +'<div class="ainote">Не удалось загрузить требования — проверь интернет и попробуй ещё раз.</div>'
+      +'<div class="usec">Отзывы студентов</div><div id="ureviews"><div class="uspinner"><div class="spin"></div>Загружаем отзывы…</div></div>'
+      +'<a class="redditbtn" href="'+redditURL(u)+'" target="_blank" rel="noopener">Читать отзывы на Reddit →</a>'
+      +'<button class="choosebtn'+(picked2?' picked':'')+'" id="uchoose2">'+(picked2?'✓ Выбран — убрать':'✓ Всё равно выбрать этот вуз')+'</button>'
+      +'<button class="btn" id="uretry">Попробовать снова</button></div>';
+    document.getElementById('uclose').onclick=closeUni;
+    document.getElementById('uchoose2').onclick=function(){ toggleUni(u.name,u.place); openUniRefreshBtn(u); };
+    document.getElementById('uretry').onclick=function(){ openUni(name); };
+    renderReviewsInto(u);
+  });
+}
+function openUniRefreshBtn(u){
+  try{
+    var b=document.getElementById('uchoose')||document.getElementById('uchoose2');
+    if(b){ var p=isPicked(u.name); b.classList.toggle('picked',p); b.textContent=p?'✓ Выбран — убрать из списка':'＋ Добавить к выбранным'; }
+    var g=document.getElementById('ugoplan'); if(g) g.textContent='К плану с выбранными ('+getChosen().length+') →';
+  }catch(e){}
+}
+function closeUni(){ document.getElementById('uniModal').classList.remove('open'); }
+document.getElementById('uniModal').addEventListener('click',function(e){
+  if(e.target===this) closeUni();
+});
+
+/* ================= Достижения ================= */
+var AW_SPHERES = ['Олимпиады','Наука','IT и хакатоны','Спорт','Творчество','Музыка','Волонтёрство','Дебаты и клубы','Другое'];
+var AW_FORMATS = ['Лично','В команде','Онлайн'];
+var awSphere = '', awFormat = 'Лично', awOpen = false;
+var awAi = null, awAiKey = '';
+var awCont = null, awContKey = '';
+function awHash(){
+  var s=JSON.stringify(S.myAwards||[]);
+  s+='|'+getChosen().map(function(u){ return u.name; }).sort().join(',');
+  s+='|'+(S.dreamJob||'');
+  var h=0;
+  for(var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; }
+  return String(h);
+}
+function awAssessPrompt(){
+  return 'Ты — наставник по поступлению. Школьник ведёт вкладку достижений, вузы: '+(unisLine()||'пока не выбраны')+'.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nОцени его УЖЕ ДОСТИГНУТЫЕ успехи и скажи чего не хватает. Верни СТРОГО JSON: {"level":"...","strong":["...","..."],"gaps":["...","..."],"next":["...","...","..."]}.\n- level: 1 короткая оценка уровня портфолио (например "Сильный старт" или "Пока слабо для топ-вузов").\n- strong: 2-3 конкретные сильные стороны из ЕГО достижений.\n- gaps: 2-3 конкретных пробела именно под его вузы и направление.\n- next: 3 конкретных следующих шага (что сделать, где участвовать).\nВсё на русском, конкретно, без воды. Только JSON.';
+}
+function fallbackAwAssess(){
+  var list=S.myAwards||[], by={};
+  list.forEach(function(a){ by[a.sphere||'Другое']=1; });
+  var have=Object.keys(by);
+  var strong=have.length?have.slice(0,3).map(function(s){ return 'Есть победы в сфере «'+s+'» — это уже выделяет.'; }):['Пока пусто — любое первое достижение уже будет плюсом.'];
+  var want=['Олимпиады','IT и хакатоны','Наука'];
+  var gaps=want.filter(function(s){ return !by[s]; }).slice(0,2).map(function(s){ return 'Нет достижений в сфере «'+s+'» — вузы это любят.'; });
+  if(!gaps.length) gaps=['Добавь достижение повыше уровнем: республика, международный этап.'];
+  return {level:list.length>=5?'Хорошая база':(list.length>=2?'Есть задел':'Самое начало'),
+    strong:strong,gaps:gaps,
+    next:['Возьми 1 олимпиаду или хакатон в этом семестре и доведи до результата.',
+      'Оформи все победы в портфолио с датами и ссылками.',
+      'Выбери следующую цель повыше уровнем и впиши её в план.'],
+    fallback:true};
+}
+function fetchAwAssess(){
+  return aiTry(awAssessPrompt(),function(o){
+    if(!o.level&&!o.next) throw new Error('empty');
+    function arr(x){ return Array.isArray(x)?x.slice(0,4).map(String):[]; }
+    return {level:String(o.level||'—'),strong:arr(o.strong),gaps:arr(o.gaps),next:arr(o.next).slice(0,3)};
+  });
+}
+function ensureAwAssess(){
+  var list=S.myAwards||[];
+  if(!list.length){ toast('Сначала добавь хотя бы одно достижение'); return; }
+  var k=awHash();
+  if(awAi&&awAiKey===k) return;
+  awAi='loading'; awAiKey=k; renderAwards();
+  withTimeout(fetchAwAssess()).then(function(out){
+    if(awAiKey!==awHash()) return;
+    awAi=out; renderAwards();
+  }).catch(function(){
+    if(awAiKey!==awHash()) return;
+    var fb=fallbackAwAssess(); fb.fallback=true; awAi=fb; renderAwards();
+  });
+}
+function awAssessHTML(){
+  if(!awAi) return '';
+  if(awAi==='loading') return '<div class="card" style="margin-bottom:12px"><div class="uspinner"><div class="spin"></div>ИИ смотрит твои успехи…</div></div>';
+  function li(arr){ return (arr||[]).map(function(x){ return '<div>'+esc(x)+'</div>'; }).join(''); }
+  return '<div class="card" style="margin-bottom:12px;border-color:rgba(0,210,255,.4)"><div class="bignum2">✨ '+esc(awAi.level)+'</div>'
+    +(awAi.fallback?'<div class="cap" style="margin:4px 0">Базовая оценка (ИИ недоступен)</div>':'<div class="cap" style="margin:4px 0">ИИ видит твои достижения и учитывает их в тирлисте и планах ✓</div>')
+    +'<div class="usec">Сильные стороны</div><div class="ulist">'+li(awAi.strong)+'</div>'
+    +'<div class="usec">Чего не хватает</div><div class="ulist">'+li(awAi.gaps)+'</div>'
+    +'<div class="usec">Что делать дальше</div><div class="ulist">'+li(awAi.next)+'</div></div>';
+}
+function awContestsPrompt(){
+  return 'Ты — наставник по олимпиадам и конкурсам. Школьник: вузы — '+(unisLine()||'пока не выбраны')+'. Вот чего он УЖЕ добился: '+((S.myAwards||[]).map(function(a){ return '['+(a.sphere||'?')+'] '+a.title+' ('+(a.result||'')+')'; }).join(' | ')||'пока ничего не записано')+'.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nПодбери 5-6 РАЗНЫХ конкурсов, олимпиад и хакатонов, которые ИМЕННО ЕМУ подходят (по интересам, навыкам и уровню достижений: слабым — доступные, сильным — престижные). Верни СТРОГО JSON: {"contests":[{"name":"...","sphere":"...","why":"...","when":"...","link":"..."}]}.\n- name — название конкурса, sphere — сфера (Олимпиады, IT и хакатоны, Наука, Спорт, Творчество и т.д.), why — 1 предложение почему именно ему, when — когда проходит/дедлайн, link — официальный сайт если знаешь, иначе пусто.\nВсё на русском. Только JSON.';
+}
+function fallbackAwContests(){
+  return [
+    {name:'Республиканская предметная олимпиада (Дарын)',sphere:'Олимпиады',why:'Главный школьный конкурс страны — победа даёт льготы при поступлении.',when:'Школьный этап — осенью',link:'https://daryn.kz'},
+    {name:'NASA Space Apps Challenge',sphere:'IT и хакатоны',why:'Международный онлайн-хакатон: команда, проект за 48 часов и строка в портфолио.',when:'Октябрь, онлайн',link:'https://www.spaceappschallenge.org'},
+    {name:'Конкурс научных проектов «Дарын»',sphere:'Наука',why:'Если нравится исследовать — оформи свою работу и защити её.',when:'Зима–весна',link:'https://daryn.kz'},
+    {name:'Хакатоны Astana Hub',sphere:'IT и хакатоны',why:'Регулярные хакатоны с призами и нетворком — быстрый опыт и победы.',when:'Круглый год',link:'https://astanahub.com'},
+    {name:'Technovation Challenge',sphere:'IT и хакатоны',why:'Сделай своё приложение с пользой для общества и поборись за финал.',when:'Январь–апрель, онлайн',link:'https://www.technovationchallenge.org'},
+    {name:'World Scholar’s Cup (региональный раунд)',sphere:'Дебаты и клубы',why:'Дебаты, эссе и тесты на английском — прокачка языка и мышления.',when:'Весна, Алматы/Астана',link:''}
+  ];
+}
+function fetchAwContests(){
+  return aiTry(awContestsPrompt(),function(o){
+    var list=o.contests||o.items||[];
+    if(!list.length) throw new Error('empty');
+    var out=list.slice(0,8).map(function(r){
+      return {name:String(r.name||''),sphere:String(r.sphere||''),why:String(r.why||r.reason||''),when:String(r.when||''),link:String(r.link||'')};
+    }).filter(function(r){ return r.name; });
+    if(!out.length) throw new Error('empty');
+    return out;
+  });
+}
+function ensureAwContests(){
+  var k=awHash();
+  if(awCont&&awContKey===k) return;
+  awCont='loading'; awContKey=k; renderAwards();
+  withTimeout(fetchAwContests()).then(function(out){
+    if(awContKey!==awHash()) return;
+    awCont=out; renderAwards();
+  }).catch(function(){
+    if(awContKey!==awHash()) return;
+    var fb=fallbackAwContests(); fb._fb=true; awCont=fb; renderAwards();
+  });
+}
+function awContestsHTML(){
+  if(!awCont) return '';
+  if(awCont==='loading') return '<div class="card" style="margin-bottom:12px"><div class="uspinner"><div class="spin"></div>ИИ ищет конкурсы под твои достижения…</div></div>';
+  var h='<div class="card" style="margin-bottom:12px;border-color:rgba(255,209,102,.45)"><div class="bignum2">💡 Конкурсы именно для тебя</div>'
+    +'<div class="cap" style="margin:4px 0">'+(awCont._fb?'Базовая подборка (ИИ недоступен)':'ИИ посмотрел на твои достижения и нашёл подходящее ✓')+'</div>';
+  awCont.forEach(function(c){
+    h+='<div class="rev"><b>'+esc(c.name)+'</b>'
+      +(c.sphere?'<div style="margin:3px 0"><span class="mtag">'+esc(c.sphere)+'</span></div>':'')
+      +(c.why?'<p>🎯 '+esc(c.why)+'</p>':'')
+      +(c.when?'<p>🗓 '+esc(c.when)+'</p>':'')
+      +(c.link?'<a href="'+esc(c.link)+'" target="_blank" rel="noopener" style="color:#7ee7ff;font-size:13px">Официальный сайт →</a>':'')
+      +'</div>';
+  });
+  return h+'</div>';
+}
+function renderAwards(){
+  var body=document.getElementById('awardsBody');
+  var list=S.myAwards||[];
+  document.getElementById('awSub').textContent = list.length?('Всего: '+list.length):'Твои победы в одном месте';
+  var h='<button class="btn" id="awAdd">'+(awOpen?'✕ Закрыть':'＋ Добавить достижение')+'</button><div style="height:12px"></div>';
+  if(awAi&&awAiKey!==awHash()){ awAi=null; awAiKey=''; }
+  if(awCont&&awContKey!==awHash()){ awCont=null; awContKey=''; }
+  if(list.length){
+    h+='<button class="btn ghost" id="awAiBtn" style="margin-top:0">✨ Анализ ИИ: чего я уже добился и чего не хватает</button><div style="height:12px"></div>';
+    h+='<div class="ainote">Синхронизация с ИИ ✓ — эти достижения уже учитываются в тирлисте вузов и планах.</div>';
+  }
+  h+=awAssessHTML();
+  h+='<div class="card" style="margin-bottom:12px"><div class="bignum2">💡 Конкурсы для тебя</div>'
+    +'<div class="cap" style="margin:4px 0 10px">ИИ смотрит на твои достижения и находит много разных конкурсов, которые именно тебе подходят.</div>'
+    +'<button class="btn" id="awContBtn">🔍 Найти конкурсы для меня</button></div>';
+  h+=awContestsHTML();
+  if(awOpen){
+    h+='<div class="card" style="margin-bottom:12px"><div class="qlabel">Сфера</div><div class="chips" id="awSpheres">'
+      +AW_SPHERES.map(function(s){ return '<div class="chip'+(awSphere===s?' sel':'')+'" data-v="'+esc(s)+'">'+esc(s)+'</div>'; }).join('')
+      +'</div><label>Что за достижение? *</label><input class="field" id="awTitle" placeholder="Например, 1 место на областной олимпиаде">'
+      +'<label>Результат *</label><input class="field" id="awResult" placeholder="Например, 1 место / КМС / финалист">'
+      +'<label>Год</label><input class="field" id="awYear" inputmode="numeric" placeholder="2026">'
+      +'<label>Формат</label><div class="chips" id="awFormats">'
+      +AW_FORMATS.map(function(s){ return '<div class="chip'+(awFormat===s?' sel':'')+'" data-v="'+esc(s)+'">'+esc(s)+'</div>'; }).join('')
+      +'</div><label>Опиши подробнее</label><textarea class="area" id="awDesc" placeholder="Что делал(а), с кем, что дал этот опыт..."></textarea>'
+      +'<label>Ссылка (необязательно)</label><input class="field" id="awLink" placeholder="https://...">'
+      +'<div style="height:12px"></div><button class="btn" id="awSave">Сохранить ✓</button></div>';
+  }
+  if(!list.length && !awOpen) h+='<div class="card"><div class="cap">Пока пусто. Нажми «Добавить» и запиши первую победу — пригодится для портфолио и заявок.</div></div>';
+  list.forEach(function(a,ix){
+    h+='<div class="card" style="margin-bottom:10px"><span class="mtag">'+esc(a.sphere)+'</span> <span class="mtag">'+esc(a.format||'')+'</span>'
+      +'<div class="bignum2">'+esc(a.title)+'</div><div class="cap" style="margin:4px 0">'+esc(a.result)+((a.year)?' • '+esc(a.year):'')+'</div>'
+      +(a.desc?'<p class="cap" style="margin-bottom:6px">'+esc(a.desc)+'</p>':'')
+      +(a.link?'<a href="'+esc(a.link)+'" target="_blank" rel="noopener" style="color:#7ee7ff;font-size:13px">Открыть ссылку →</a><br>':'')
+      +'<button class="link" data-del="'+ix+'" style="color:#ff7b9c">удалить</button></div>';
+  });
+  body.innerHTML=h;
+  document.getElementById('awAdd').onclick=function(){ awOpen=!awOpen; if(!awOpen){ awSphere=''; awFormat='Лично'; } renderAwards(); };
+  var ab=document.getElementById('awAiBtn'); if(ab) ab.onclick=function(){ ensureAwAssess(); };
+  var cb2=document.getElementById('awContBtn'); if(cb2) cb2.onclick=function(){ ensureAwContests(); };
+  var sp=body.querySelectorAll('#awSpheres .chip');
+  sp.forEach(function(c){ c.onclick=function(){ awSphere=c.getAttribute('data-v'); sp.forEach(function(x){ x.classList.remove('sel'); }); c.classList.add('sel'); }; });
+  var fm=body.querySelectorAll('#awFormats .chip');
+  fm.forEach(function(c){ c.onclick=function(){ awFormat=c.getAttribute('data-v'); fm.forEach(function(x){ x.classList.remove('sel'); }); c.classList.add('sel'); }; });
+  var sv=document.getElementById('awSave');
+  if(sv) sv.onclick=function(){
+    var t=document.getElementById('awTitle').value.trim();
+    var r=document.getElementById('awResult').value.trim();
+    if(!awSphere){ toast('Выбери сферу'); return; }
+    if(!t){ toast('Напиши, что за достижение'); return; }
+    if(!r){ toast('Укажи результат'); return; }
+    if(!S.myAwards) S.myAwards=[];
+    S.myAwards.unshift({sphere:awSphere,title:t,result:r,
+      year:document.getElementById('awYear').value.trim(),
+      format:awFormat,
+      desc:document.getElementById('awDesc').value.trim(),
+      link:document.getElementById('awLink').value.trim()});
+    save(); awOpen=false; awSphere=''; awFormat='Лично';
+    renderAwards(); toast('Сохранено ✓');
+  };
+  body.querySelectorAll('[data-del]').forEach(function(b){
+    b.onclick=function(){
+      S.myAwards.splice(parseInt(b.getAttribute('data-del'),10),1);
+      save(); renderAwards();
+    };
+  });
+}
+
+/* ================= Единый план поступления (все вузы вместе) ================= */
+var PLAN_CACHE = {};
+var PLAN_LOADING = {};
+function chosenKey(){ migrateState(); return getChosen().map(function(u){ return u.name; }).sort().join('|'); }
+function monthKey(y,m){ return y+'-'+m; }
+function unisLine(){ return getChosen().map(function(u){ return u.name; }).join(', '); }
+function ensureUnified(){
+  migrateState();
+  var ck=chosenKey();
+  if(!ck){ S.plan=null; return false; }
+  if(!S.plan||!S.plan.unis||S.plan.unisKey!==ck||!S.plan.range){
+    S.plan={v:2,unisKey:ck,unis:getChosen().map(function(u){ return {name:u.name,place:u.place||''}; }),
+      range:calRange(),years:null,yearPlans:{},monthPlans:{},dayGoals:{},dayChecks:{},ai:false};
+  if(!S.planChecks||typeof S.planChecks!=='object') S.planChecks={};
+  if(!S.collapsed||typeof S.collapsed!=='object') S.collapsed={};
+    save();
+  }
+  return true;
+}
+function refreshViews(){ try{ renderMain(); }catch(e){} try{ renderCal(); }catch(e){} }
+function withTimeout(p,ms){ return Promise.race([p,new Promise(function(_,rej){ setTimeout(function(){ rej(new Error('timeout')); },ms||30000); })]); }
+function aiTry(prompt,parse){
+  var i=0;
+  function next(){
+    if(i>=GEMINI_MODELS.length) return Promise.reject(new Error('all models failed'));
+    var m=GEMINI_MODELS[i++];
+    return Promise.resolve().then(function(){ return modelJSON(m,prompt); }).then(parse).catch(function(){ return next(); });
+  }
+  return next();
+}
+function yearsPrompt(){
+  var R=S.plan.range;
+  return 'Ты — наставник по поступлению. Школьник поступает в вузы: '+unisLine()+'. Горизонт: '+R.y0+'–'+R.y1+'.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nСоставь ОБЩИЙ план подготовки по годам (один для всех вузов). Верни СТРОГО JSON: {"years":[{"y":'+R.y0+',"t":"...","d":"..."}]} — по одному пункту на КАЖДЫЙ год с '+R.y0+' по '+R.y1+'. t — короткий заголовок года, d — 2-3 предложения что делать с учётом профиля. Только JSON.';
+}
+function yearPrompt(y){
+  return 'Ты — наставник по поступлению. Школьник поступает в вузы: '+unisLine()+'.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nСоставь ОБЩИЙ план на '+y+' год по месяцам (один для всех вузов). Верни СТРОГО JSON: {"months":[{"m":"Январь","t":"...","d":"..."}]} — ровно 12 пунктов, m — название месяца, t — заголовок, d — 1-2 предложения. Только JSON.';
+}
+function monthPrompt(y,mName){
+  var dim=new Date(y,CAL_MONTHS.indexOf(mName)+1,0).getDate();
+  return 'Ты — наставник по поступлению. Школьник поступает в вузы: '+unisLine()+'.\n\nПРОФИЛЬ:\n'+profileText()+'\n\nСоставь НАСЫЩЕННЫЙ план на '+mName+' '+y+' года: на КАЖДЫЙ день придумай по 3-4 РАЗНЫЕ конкретные задачи, чтобы каждый день обязательно покрывал: 1) АНГЛИЙСКИЙ язык (слова, чтение, аудирование, эссе), 2) УРОКИ и профильные предметы (математика, физика и др. из профиля), 3) АКТИВНОСТИ (олимпиады, хакатоны, проекты, портфолио, спорт). Плюс иногда документы и пробники. Каждая задача — подробно и понятно: что делать, как делать, сколько времени. Верни СТРОГО JSON: {"steps":[{"day":1,"c":"Английский","t":"...","how":"..."}]} — day число месяца от 1 до '+dim+', c — категория строго из списка (Английский, Уроки, Активности, Документы, Экзамены), t — что делать конкретно, how — как делать и сколько времени. Всего около '+(dim*3)+' пунктов. Без воды. Только JSON.';
+}
+function fallbackYears(){
+  var R=S.plan?S.plan.range:calRange(), out=[];
+  for(var y=R.y0;y<=R.y1;y++){
+    var last=(y===R.y1), first=(y===R.y0);
+    out.push({y:y,
+      t:last?'Подача и поступление':(first?'Фундамент':'Углубление'),
+      d:last?('Сдаёшь экзамены и подаёшь документы в '+unisLine()+', подтверждаешь грант.'):
+        (first?'База: английский, математика и профильные предметы, первые олимпиады и проекты.':
+          'IELTS, пробники и портфолио под требования: '+unisLine()+'.')});
+  }
+  return out;
+}
+function fallbackYearPlan(){
+  var tpl=[
+    ['Пробники','Сдай 2 полных пробника в условиях реального времени и разбери все ошибки.'],
+    ['Документы','Готовь мотивационное письмо, рекомендации и транскрипт.'],
+    ['Профильные предметы','Упор на математику и предметы по направлению, разбирай пробники.'],
+    ['Английский','IELTS каждый день по 40 минут плюс 1 пробный тест в неделю.'],
+    ['Активности','Олимпиада, хакатон или pet-проект — доведи один до конца.'],
+    ['Портфолио','Собери всё в одну папку: грамоты, проекты, сертификаты.'],
+    ['Повторение','Закрой пробелы по слабым темам, веди трекер ошибок.'],
+    ['Экзамены','Запишись на нужные слоты и готовься по плану.'],
+    ['Требования','Сверь требования вузов: баллы, дедлайны, экзамены.'],
+    ['Интервью','Потренируй интервью и самопрезентацию с наставником.'],
+    ['Заявки','Отправь документы и следи за статусами.'],
+    ['Отдых и план','Восстанови силы и распиши следующий месяц.']
+  ];
+  return CAL_MONTHS.map(function(mn,mi){ return {m:mn,t:tpl[mi%tpl.length][0],d:tpl[mi%tpl.length][1]}; });
+}
+function fallbackMonthPlan(y,mi){
+  var dim=new Date(y,mi+1,0).getDate(), out=[];
+  var eng=[
+    '15 новых слов + повторение вчерашних, 10 минут аудирования.',
+    '1 текст с полным переводом + 5 новых выражений в словарь.',
+    'Эссе 150 слов + проверка по чек-листу грамматики.',
+    '30 минут сериала/подкаста на английском с субтитрами, выписать фразы.'
+  ];
+  var les=[
+    'Математика: 1 тема и 10 задач с таймером, ошибки — в трекер.',
+    'Профильный предмет: 1 параграф, конспект и 5 вопросов себе вслух.',
+    'Мини-пробник 45 минут в тишине + разбор каждой ошибки.',
+    'Повторение: 20 старых карточек и 1 слабая тема заново.'
+  ];
+  var act=[
+    'Олимпиадные задачи: 1 час, зафиксируй решения и вопросы.',
+    'Проект: 1 час кода/дизайна, закоммить результат.',
+    'Портфолио: оформи 1 достижение — текст, фото, ссылки.',
+    'Документы: 30 минут — требования вузов, дедлайны, письма.'
+  ];
+  for(var d=1;d<=dim;d++){
+    out.push({day:d,c:'Английский',t:'Английский — день '+d,d:eng[(d-1)%eng.length]});
+    out.push({day:d,c:'Уроки',t:'Уроки — день '+d,d:les[(d-1)%les.length]});
+    out.push({day:d,c:'Активности',t:'Активности — день '+d,d:act[(d-1)%act.length]});
+  }
+  return out;
+}
+function fetchYears(){
+  var ck=S.plan.unisKey, R=S.plan.range, ck2='years|'+ck+'|'+R.y0+'-'+R.y1;
+  if(PLAN_CACHE[ck2]) return Promise.resolve(PLAN_CACHE[ck2]);
+  return aiTry(yearsPrompt(),function(o){
+    if(!o.years||!o.years.length) throw new Error('empty');
+    var out=o.years.slice(0,10).map(function(r){ return {y:parseInt(r.y,10)||0,t:String(r.t||''),d:String(r.d||'')}; })
+      .filter(function(r){ return r.y&&r.t; });
+    if(!out.length) throw new Error('empty');
+    PLAN_CACHE[ck2]=out; return out;
+  });
+}
+function fetchYearPlan(y){
+  var ck=S.plan.unisKey, ck2='year|'+ck+'|'+y;
+  if(PLAN_CACHE[ck2]) return Promise.resolve(PLAN_CACHE[ck2]);
+  return aiTry(yearPrompt(y),function(o){
+    if(!o.months||!o.months.length) throw new Error('empty');
+    var out=o.months.slice(0,12).map(function(r){ return {m:String(r.m||''),t:String(r.t||''),d:String(r.d||'')}; })
+      .filter(function(r){ return r.m&&r.t; });
+    if(out.length<6) throw new Error('too few');
+    PLAN_CACHE[ck2]=out; return out;
+  });
+}
+function fetchMonthPlan(y,mi){
+  var ck=S.plan.unisKey, ck2='month|'+ck+'|'+y+'-'+mi;
+  if(PLAN_CACHE[ck2]) return Promise.resolve(PLAN_CACHE[ck2]);
+  return aiTry(monthPrompt(y,CAL_MONTHS[mi]),function(o){
+    var arr=o.steps||o.days||[];
+    if(!arr.length) throw new Error('empty');
+    var out=arr.slice(0,140).map(function(r){
+      return {day:parseInt((r.day!=null?r.day:r.n),10)||0,c:String(r.c||''),
+        t:String(r.t||''),d:String((r.how!=null?r.how:(r.d||'')))};
+    }).filter(function(r){ return r.t&&r.day; });
+    if(out.length<20) throw new Error('too few');
+    out.sort(function(a,b){ return a.day-b.day; });
+    PLAN_CACHE[ck2]=out; return out;
+  });
+}
+function removeUni(name){
+  migrateState();
+  S.chosenUnis=S.chosenUnis.filter(function(u){ return u.name!==name; });
+  if(S.chosenUni&&S.chosenUni.name===name) S.chosenUni=S.chosenUnis[0]||null;
+  save(); try{ renderTier(); }catch(e){}
+  refreshViews();
+  toast('Убрано: '+name);
+}
+function monthProgress(key){
+  var steps=((S.plan&&S.plan.monthPlans&&S.plan.monthPlans[key])||[]);
+  var chks=((S.planChecks&&S.planChecks[key])||{}), done=0;
+  steps.forEach(function(_,ix){ if(chks[ix]) done++; });
+  return {done:done,total:steps.length,pct:steps.length?Math.round(done/steps.length*100):0};
+}
+function toggleStep(key,ix){
+  if(!S.planChecks||typeof S.planChecks!=='object') S.planChecks={};
+  if(!S.planChecks[key]) S.planChecks[key]={};
+  if(S.planChecks[key][ix]) delete S.planChecks[key][ix]; else S.planChecks[key][ix]=1;
+  save(); refreshViews();
+}
+function planComplete(){
+  if(!S.plan||!S.plan.years||!S.plan.range) return false;
+  var R=S.plan.range;
+  for(var y=R.y0;y<=R.y1;y++) if(!S.plan.yearPlans[y]) return false;
+  var n=new Date();
+  if(!S.plan.monthPlans[monthKey(n.getFullYear(),n.getMonth())]) return false;
+  return true;
+}
+function buildProgress(){
+  if(!S.plan||!S.plan.range) return null;
+  var R=S.plan.range, total=1+(R.y1-R.y0+1)+1, done=0;
+  if(S.plan.years) done++;
+  for(var y=R.y0;y<=R.y1;y++) if(S.plan.yearPlans[y]) done++;
+  var n=new Date();
+  if(S.plan.monthPlans[monthKey(n.getFullYear(),n.getMonth())]) done++;
+  var labels=['Строим общий план по годам…','Составляем планы на 12 месяцев…','Расписываем текущий месяц по дням…','Готово'];
+  var stage=!S.plan.years?0:(done<total-1?1:(done<total?2:3));
+  return {done:done,total:total,pct:Math.round(done/total*100),label:labels[stage],finished:done>=total};
+}
+function buildFullPlan(){
+  if(!ensureUnified()){ refreshViews(); return; }
+  if(planComplete()) return;
+  var ck=S.plan.unisKey, lk='full|'+ck;
+  if(PLAN_LOADING[lk]) return; PLAN_LOADING[lk]=1;
+  refreshViews();
+  function startYearPlans(){
+    var R=S.plan.range, ys=[];
+    for(var y=R.y0;y<=R.y1;y++) ys.push(y);
+    var ps=ys.map(function(yy){
+      return withTimeout(fetchYearPlan(yy)).then(
+        function(o){ return {y:yy,o:o,ok:true}; },
+        function(){ return {y:yy,o:fallbackYearPlan(),ok:false}; });
+    });
+    return Promise.all(ps);
+  }
+  withTimeout(fetchYears()).then(function(out){
+    if(!S.plan||S.plan.unisKey!==ck) throw new Error('changed');
+    S.plan.years=out; S.plan.ai=true; save(); refreshViews();
+    return startYearPlans();
+  },function(){
+    if(!S.plan||S.plan.unisKey!==ck) throw new Error('changed');
+    S.plan.years=fallbackYears(); save(); refreshViews();
+    return startYearPlans();
+  }).then(function(res){
+    if(!S.plan||S.plan.unisKey!==ck) throw new Error('changed');
+    var anyAi=S.plan.ai;
+    res.forEach(function(r){ S.plan.yearPlans[r.y]=r.o; if(r.ok) anyAi=true; });
+    S.plan.ai=anyAi; save(); refreshViews();
+    var n=new Date();
+    return withTimeout(fetchMonthPlan(n.getFullYear(),n.getMonth())).then(
+      function(o){ return {o:o,ok:true}; },
+      function(){ var nn=new Date(); return {o:fallbackMonthPlan(nn.getFullYear(),nn.getMonth()),ok:false}; });
+  }).then(function(r){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    var n=new Date();
+    S.plan.monthPlans[monthKey(n.getFullYear(),n.getMonth())]=r.o;
+    if(r.ok) S.plan.ai=true;
+    save(); refreshViews();
+  }).catch(function(){ delete PLAN_LOADING[lk]; save(); refreshViews(); });
+}
+function ensureYears(){
+  if(!ensureUnified()){ refreshViews(); return; }
+  if(S.plan.years) return;
+  var ck=S.plan.unisKey, lk='years|'+ck;
+  if(PLAN_LOADING[lk]) return; PLAN_LOADING[lk]=1;
+  withTimeout(fetchYears()).then(function(out){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.years=out; S.plan.ai=true; save(); refreshViews();
+  }).catch(function(){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.years=fallbackYears(); S.plan.ai=false; save(); refreshViews();
+  });
+}
+function ensureYearPlan(y){
+  if(!ensureUnified()){ refreshViews(); return; }
+  if(S.plan.yearPlans[y]) return;
+  var ck=S.plan.unisKey, lk='year|'+ck+'|'+y;
+  if(PLAN_LOADING[lk]) return; PLAN_LOADING[lk]=1;
+  withTimeout(fetchYearPlan(y)).then(function(out){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.yearPlans[y]=out; S.plan.ai=true; save(); refreshViews();
+  }).catch(function(){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.yearPlans[y]=fallbackYearPlan(); S.plan.ai=false; save(); refreshViews();
+  });
+}
+function ensureMonthPlan(y,mi){
+  if(!ensureUnified()){ refreshViews(); return; }
+  var key=monthKey(y,mi);
+  if(S.plan.monthPlans[key]) return;
+  var ck=S.plan.unisKey, lk='month|'+ck+'|'+key;
+  if(PLAN_LOADING[lk]) return; PLAN_LOADING[lk]=1;
+  withTimeout(fetchMonthPlan(y,mi)).then(function(out){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.monthPlans[key]=out; S.plan.ai=true; save(); refreshViews();
+  }).catch(function(){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    S.plan.monthPlans[key]=fallbackMonthPlan(y,mi); S.plan.ai=false; save(); refreshViews();
+  });
+}
+function rebootPlan(){
+  S.plan=null; S.planChecks={}; save();
+  buildFullPlan();
+  toast('План перестраивается…');
+}
+function ringSVG(pct){
+  var C=2*Math.PI*38;
+  return '<svg width="110" height="110" viewBox="0 0 110 110">'
+    +'<circle cx="55" cy="55" r="38" stroke="rgba(255,255,255,.08)" stroke-width="11" fill="none"/>'
+    +'<circle cx="55" cy="55" r="38" stroke="url(#pg)" stroke-width="11" fill="none" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-pct/100)).toFixed(1)+'" transform="rotate(-90 55 55)" style="transition:stroke-dashoffset .6s ease"/>'
+    +'<defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00d2ff"/><stop offset="1" stop-color="#7b2ff7"/></linearGradient></defs></svg>';
+}
+function renderMain(){
+  migrateState();
+  var body=document.getElementById('mainBody');
+  var chosen=getChosen();
+  document.getElementById('mainSub').textContent=chosen.length?('Общий план • вузов: '+chosen.length):'Твой план поступления';
+  if(!chosen.length){
+    body.innerHTML='<div class="card"><div class="bignum">?</div><div class="cap">Сначала выбери вузы — можно несколько сразу. Составим один общий план: по годам, на год и подробный на текущий месяц.</div></div><div style="height:12px"></div>'
+      +(S.done
+        ?'<button class="btn" id="mTier">Открыть тирлист (20) →</button>'
+        :'<button class="btn" id="mSurvey">Пройти анкету →</button>');
+    var mt=document.getElementById('mTier'); if(mt) mt.onclick=function(){ finish(); };
+    var ms=document.getElementById('mSurvey'); if(ms) ms.onclick=function(){ showTab('survey'); };
+    return;
+  }
+  ensureUnified();
+  buildFullPlan();
+  var bp=buildProgress();
+  var h='<div class="unichips">'+chosen.map(function(u){
+    return '<div class="unichip">'+esc(u.name)+'<button class="x" data-remove="'+esc(u.name)+'">✕</button></div>';
+  }).join('')+'</div>';
+  var n=new Date(), key=monthKey(n.getFullYear(),n.getMonth()), todayN=n.getDate();
+  var mp=S.plan.monthPlans[key];
+  var wd=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][n.getDay()];
+  h+='<div class="tier-head"><div class="tier-name">Сегодня • '+todayN+' '+esc(CAL_MONTHS[n.getMonth()])+'</div><div class="tier-sub">'+wd+' • цели только на сегодня</div></div>';
+  if(!mp){
+    h+='<div class="card"><div class="uspinner"><div class="spin"></div>'+esc(bp?bp.label:'Строим план…')+'</div>'
+      +(bp?'<div class="bar"><i style="width:'+bp.pct+'%"></i></div><div class="pct">'+bp.done+'/'+bp.total+'</div>':'')+'</div>';
+  } else {
+    var tkIdxs=[], tkTasks=[];
+    for(var tki=0;tki<mp.length;tki++) if(mp[tki].day===todayN){ tkIdxs.push(tki); tkTasks.push(mp[tki]); }
+    if(!S.plan.dayGoals) S.plan.dayGoals={};
+    var gk=key+'-'+todayN;
+    var tdg=S.plan.dayGoals[gk];
+    if(tkTasks.length&&!tdg) ensureDayGoals(n.getFullYear(),n.getMonth(),todayN);
+    var tchks=(S.planChecks[key]||{}), tgch=(S.plan.dayChecks&&S.plan.dayChecks[gk])||{};
+    var ttot=0, tdn=0;
+    tkIdxs.forEach(function(ix){ ttot++; if(tchks[ix]) tdn++; });
+    if(tdg) tdg.forEach(function(_,gi){ ttot++; if(tgch[gi]) tdn++; });
+    var tpct=ttot?Math.round(tdn/ttot*100):100;
+    var bolt='<div class="bbolt"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>';
+    h+='<div class="card plan-top"><div class="pring">'+ringSVG(tpct)+'<div class="pring-num">'+tpct+'%</div></div>'
+      +'<div class="cap"><b>Цели на сегодня</b>'
+      +'<div class="battery"><div class="blevel'+(tpct<34?' low':'')+'" style="width:'+tpct+'%"><div class="bshine"></div></div>'+(tpct<100?bolt:'')+'</div>'
+      +'<div class="bcap">'+tdn+' из '+ttot+'</div></div></div>';
+    if(!tkTasks.length){
+      h+='<div class="card"><div class="cap">На сегодня задач нет — отдыхай 🎉</div></div>';
+    } else {
+      tkIdxs.forEach(function(ix){
+        var s=mp[ix], tkDone=!!tchks[ix];
+        h+='<button class="step'+(tkDone?' done':'')+'" data-mkey="'+key+'" data-step="'+ix+'"><span class="cbox">'+(tkDone?'✓':'')+'</span><span class="st">'+(s.c?'<span class="mtag">'+esc(s.c)+'</span>':'')+'<b>'+esc(s.t)+'</b><span>'+esc(s.d||'')+'</span></span></button>';
+      });
+      h+='<div class="tier-sub" style="margin:12px 0 6px">Цели дня:</div>';
+      if(!tdg){
+        h+='<div class="card"><div class="uspinner"><div class="spin"></div>Разбиваем день на цели…</div></div>';
+      } else {
+        tdg.forEach(function(g,gi){
+          h+='<button class="step'+(tgch[gi]?' done':'')+'" data-gkey="'+gk+'" data-gstep="'+gi+'"><span class="cbox">'+(tgch[gi]?'✓':'')+'</span><span class="st"><b>'+esc(g.t)+'</b>'+(g.d?'<span>'+esc(g.d)+'</span>':'')+'</span></button>';
+        });
+      }
+    }
+  }
+  h+='<button class="btn ghost" id="mTier2">Тирлист (20) →</button>';
+  h+='<button class="btn ghost" id="mAdd">＋ Добавить ещё вузы</button>';
+  h+='<button class="btn ghost" id="mReboot">↻ Перестроить план</button>';
+  body.innerHTML=h;
+  bindMainChips(body);
+  body.querySelectorAll('[data-step]').forEach(function(b){
+    b.addEventListener('click',function(){ toggleStep(b.getAttribute('data-mkey'),parseInt(b.getAttribute('data-step'),10)); });
+  });
+  body.querySelectorAll('[data-gstep]').forEach(function(b){
+    b.addEventListener('click',function(){ toggleDayGoal(b.getAttribute('data-gkey'),parseInt(b.getAttribute('data-gstep'),10)); });
+  });
+  document.getElementById('mTier2').onclick=function(){ finish(); };
+  document.getElementById('mAdd').onclick=function(){ finish(); };
+  document.getElementById('mReboot').onclick=function(){ rebootPlan(); };
+}
+function bindMainChips(body){
+  body.querySelectorAll('[data-remove]').forEach(function(b){
+    b.addEventListener('click',function(e){ e.stopPropagation(); removeUni(b.getAttribute('data-remove')); });
+  });
+}
+var CAL_MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+function calRange(){
+  var nowY=new Date().getFullYear();
+  var m=String(S.admitYear||'').match(/(\d{4})/);
+  var y1=m?parseInt(m[1],10):(nowY+2);
+  if(!(y1>=nowY)) y1=nowY;
+  if(y1>nowY+6) y1=nowY+6;
+  return {y0:nowY,y1:y1};
+}
+/* monthStepIdxs удалён: месяцы берутся из S.plan.yearPlans, детали — из S.plan.monthPlans */
+function setCal(level,y,m,d){
+  migrateState();
+  S.cal={level:level,y:(y==null?null:y),m:(m==null?null:m),d:(d==null?null:d)};
+  save(); renderCal();
+}
+function renderCal(){
+  migrateState();
+  var body=document.getElementById('calBody');
+  var chosen=getChosen();
+  if(!chosen.length){ body.innerHTML='<div class="card"><div class="cap">Календарь появится, когда выберешь вузы в тирлисте (можно несколько).</div></div>'; return; }
+  if(!ensureUnified()){ body.innerHTML='<div class="card"><div class="cap">Календарь появится, когда выберешь вузы в тирлисте (можно несколько).</div></div>'; return; }
+  buildFullPlan();
+  if(!S.cal||!S.cal.level) S.cal={level:'years',y:null,m:null};
+  var R=calRange(), nowD=new Date(), lv=S.cal.level;
+  if(lv==='months'&&(S.cal.y==null||S.cal.y<R.y0||S.cal.y>R.y1)){ S.cal={level:'years',y:null,m:null}; lv='years'; }
+  if(lv==='days'){
+    if(S.cal.y==null||S.cal.y<R.y0||S.cal.y>R.y1) S.cal.y=Math.min(Math.max(nowD.getFullYear(),R.y0),R.y1);
+    if(S.cal.m==null||S.cal.m<0||S.cal.m>11) S.cal.m=nowD.getMonth();
+    S.cal.level='days'; lv='days';
+  }
+  var chips='<div class="unichips">'+chosen.map(function(u){
+    return '<div class="unichip">'+esc(u.name)+'<button class="x" data-remove="'+esc(u.name)+'">✕</button></div>';
+  }).join('')+'</div>';
+  function bindChips(){ bindMainChips(body); }
+  if(lv==='years'){
+    var h=chips+'<div class="card"><div class="cap">Общий план: '+R.y0+' → '+R.y1+(S.admitYear?' • по анкете: '+esc(S.admitYear):'')+'. Выбери год — откроются месяцы.</div></div><div style="height:12px"></div>';
+    if(!S.plan.years){
+      h+='<div class="card"><div class="uspinner"><div class="spin"></div>ИИ строит общий план по годам…</div></div>';
+    } else {
+      for(var y=R.y0;y<=R.y1;y++){
+        var ye=null;
+        for(var yi=0;yi<S.plan.years.length;yi++) if(S.plan.years[yi].y===y) ye=S.plan.years[yi];
+        var tag=(y===nowD.getFullYear())?' • текущий год':'';
+        var fin=(y===R.y1)?' • поступление':'';
+        h+='<button class="yearcard" data-year="'+y+'"><span class="yb">'+y+'</span><span class="ys">'+(ye?esc(ye.t):'12 месяцев')+tag+fin+(ye?'<br>'+esc(ye.d):'')+'</span><span class="ya">→</span></button>';
+      }
+    }
+    body.innerHTML=h; bindChips();
+    body.querySelectorAll('[data-year]').forEach(function(b){
+      b.addEventListener('click',function(){ setCal('months',parseInt(b.getAttribute('data-year'),10),null); });
+    });
+    return;
+  }
+  if(lv==='months'){
+    var y2=S.cal.y;
+    ensureYearPlan(y2);
+    var yp=S.plan.yearPlans[y2];
+    var h2=chips+'<button class="backline" id="calBackYears">← Все годы ('+R.y0+'–'+R.y1+')</button>'
+      +'<div class="tier-head"><div class="tier-name">'+y2+'</div><div class="tier-sub">'+(y2===R.y1?'год поступления':'до поступления: '+(R.y1-y2)+' г.')+' • общий план года</div></div>';
+    if(!yp){
+      h2+='<div class="card"><div class="uspinner"><div class="spin"></div>ИИ составляет общий план на '+y2+'…</div></div>';
+    } else {
+      h2+='<div class="monthgrid">'+yp.map(function(mo,mi){
+        var cur=(y2===nowD.getFullYear()&&mi===nowD.getMonth())?' cur':'';
+        var dk=monthKey(y2,mi), det=(S.plan.monthPlans[dk]||[]).length;
+        return '<button class="monthbtn'+cur+'" data-month="'+mi+'"><b>'+esc(mo.m||CAL_MONTHS[mi])+'</b><span>'+esc(mo.t||'')+(det?' • '+det+' задач':'')+'</span></button>';
+      }).join('')+'</div>';
+    }
+    body.innerHTML=h2; bindChips();
+    document.getElementById('calBackYears').onclick=function(){ setCal('years',null,null); };
+    body.querySelectorAll('[data-month]').forEach(function(b){
+      b.addEventListener('click',function(){ setCal('days',y2,parseInt(b.getAttribute('data-month'),10)); });
+    });
+    return;
+  }
+  var months=CAL_MONTHS;
+  calY=S.cal.y; calM=S.cal.m;
+  var first=(new Date(calY,calM,1).getDay()+6)%7;
+  var days=new Date(calY,calM+1,0).getDate();
+  var today=new Date();
+  var isCur=(today.getFullYear()===calY&&today.getMonth()===calM);
+  var dkey=monthKey(calY,calM);
+  var mpd=S.plan.monthPlans[dkey];
+  if(!mpd) ensureMonthPlan(calY,calM);
+  var mchks=(S.planChecks[dkey]||{}), doneD={};
+  if(mpd) mpd.forEach(function(s,ix){ if(s.day&&mchks[ix]) doneD[s.day]=1; });
+  var selD=S.cal.d;
+  if(selD==null||selD<1||selD>days){
+    selD=isCur?today.getDate():1;
+    if(mpd&&!isCur){ for(var si=0;si<mpd.length;si++){ var sd=mpd[si].day||0; if(sd>=1&&sd<=days&&!mchks[si]){ selD=sd; break; } } }
+    S.cal.d=selD; save();
+  }
+  var h=chips+'<button class="backline" id="calBackMonths">← '+calY+'</button>';
+  h+='<div class="cal-card"><div class="cal-head"><button class="cal-arrow" id="calPrev">←</button><b>'+months[calM]+' '+calY+'</b><button class="cal-arrow" id="calNext">→</button></div>';
+  h+='<div class="cal-grid">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(d){ return '<div class="dow">'+d+'</div>'; }).join('');
+  for(var i=0;i<first;i++) h+='<div class="day dim">•</div>';
+  for(var d=1;d<=days;d++){
+    var cls='day'+((isCur&&d===today.getDate())?' today':'')+((d===selD)?' sel':'')+((doneD[d])?' done':'');
+    h+='<button class="'+cls+'" data-day="'+d+'">'+d+'</button>';
+  }
+  h+='</div></div>';
+  var gkey=dkey+'-'+selD;
+  var wd=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][new Date(calY,calM,selD).getDay()];
+  h+='<div class="daydetail"><b>'+selD+' '+months[calM]+' • '+wd+'</b>';
+  if(!mpd){
+    h+='<div class="uspinner"><div class="spin"></div>ИИ составляет план на месяц…</div>';
+  } else {
+    var taskIdxs=[];
+    for(var ti=0;ti<mpd.length;ti++) if(mpd[ti].day===selD) taskIdxs.push(ti);
+    if(!taskIdxs.length){
+      h+='<div class="cap">На этот день задач нет — отдыхай 🎉</div>';
+    } else {
+      taskIdxs.forEach(function(tix){
+        var task=mpd[tix], tDone=!!mchks[tix];
+        h+='<button class="mrow'+(tDone?' done':'')+'" data-mkey="'+dkey+'" data-step="'+tix+'"><span class="mdot"></span><span><b>'+(task.c?esc(task.c)+' • ':'')+esc(task.t)+'</b><br><small style="color:var(--mut)">'+esc(task.d||'')+'</small></span></button>';
+      });
+      if(!S.plan.dayGoals) S.plan.dayGoals={};
+      var dg=S.plan.dayGoals[gkey];
+      h+='<div class="tier-sub" style="margin:10px 0 6px">Цели дня:</div>';
+      if(!dg){
+        ensureDayGoals(calY,calM,selD);
+        h+='<div class="uspinner"><div class="spin"></div>Разбиваем день на цели…</div>';
+      } else {
+        var gch=(S.plan.dayChecks&&S.plan.dayChecks[gkey])||{};
+        dg.forEach(function(g,gi){
+          h+='<button class="mrow'+(gch[gi]?' done':'')+'" data-gkey="'+gkey+'" data-gstep="'+gi+'"><span class="mdot"></span><span><b>'+esc(g.t)+'</b>'+(g.d?'<br><small style="color:var(--mut)">'+esc(g.d)+'</small>':'')+'</span></button>';
+        });
+      }
+    }
+  }
+  h+='</div>';
+  if(!mpd){
+    h+='<div class="card"><div class="uspinner"><div class="spin"></div>ИИ составляет подробный план на '+esc(months[calM])+'…</div></div>';
+  } else if(mpd.length){
+    var dpr=monthProgress(dkey);
+    var col=(S.collapsed&&S.collapsed[dkey])?1:0;
+    h+='<div class="month"><button class="mhead2" data-collapse="'+dkey+'"><b>'+months[calM]+' '+calY+' — детальный план • '+dpr.done+'/'+dpr.total+'</b><span>'+(col?'▶':'▼')+'</span></button><div>';
+    mpd.forEach(function(s,ix){
+      if(col&&ix>=4) return;
+      var dchks=(S.planChecks[dkey]||{}), ddone=!!dchks[ix];
+      var dlab='День '+s.day+(s.c?(' • '+s.c):'');
+      h+='<button class="mrow'+(ddone?' done':'')+'" data-mkey="'+dkey+'" data-step="'+ix+'"><span class="mdot"></span><span><b>'+esc(dlab)+': '+esc(s.t)+'</b>'+(s.d?'<br><small style="color:var(--mut)">'+esc(s.d)+'</small>':'')+'</span></button>';
+    });
+    if(col&&mpd.length>4) h+='<div class="cap" style="text-align:center;padding:8px 0 2px">··· ещё '+(mpd.length-4)+' ···</div>';
+    h+='</div></div>';
+  } else {
+    h+='<div class="card"><div class="cap">На '+months[calM].toLowerCase()+' шагов нет — листай месяцы стрелками.</div></div>';
+  }
+  body.innerHTML=h;
+  document.getElementById('calBackMonths').onclick=function(){ setCal('months',calY,null); };
+  function calGo(dm){
+    var nm=calM+dm, ny=calY;
+    if(nm<0){ nm=11; ny--; } if(nm>11){ nm=0; ny++; }
+    if(ny<R.y0||ny>R.y1){ toast('Горизонт: '+R.y0+'–'+R.y1); return; }
+    setCal('days',ny,nm);
+  }
+  document.getElementById('calPrev').onclick=function(){ calGo(-1); };
+  document.getElementById('calNext').onclick=function(){ calGo(1); };
+  bindMainChips(body);
+  body.querySelectorAll('[data-collapse]').forEach(function(b){
+    b.addEventListener('click',function(){ toggleCollapse(b.getAttribute('data-collapse')); });
+  });
+  body.querySelectorAll('[data-day]').forEach(function(b){
+    b.addEventListener('click',function(){ setCal('days',calY,calM,parseInt(b.getAttribute('data-day'),10)); });
+  });
+  body.querySelectorAll('[data-gstep]').forEach(function(b){
+    b.addEventListener('click',function(){ toggleDayGoal(b.getAttribute('data-gkey'),parseInt(b.getAttribute('data-gstep'),10)); });
+  });
+  body.querySelectorAll('[data-step]').forEach(function(b){
+    b.addEventListener('click',function(){ toggleStep(b.getAttribute('data-mkey'),parseInt(b.getAttribute('data-step'),10)); });
+  });
+}
+/* ---------- Цели на день (тап по дню) ---------- */
+function dayGoalsPrompt(y,mi,day,tasks){
+  var list=tasks.map(function(t,i){ return (i+1)+'. ['+(t.c||'Задача')+'] '+t.t+' ('+t.d+')'; }).join('\n');
+  return 'Ты — наставник по поступлению. Школьник поступает в вузы: '+unisLine()+'.\n\nЗадачи на '+day+' '+CAL_MONTHS[mi]+' '+y+':\n'+list+'\n\nРазбей этот день на 4-6 маленьких конкретных целей-шагов, покрывающих ВСЕ задачи выше (и английский, и уроки, и активности). Верни СТРОГО JSON: {"goals":[{"t":"...","d":"..."}]}. t — цель (коротко, глаголом), d — как сделать и сколько времени. Без воды. Только JSON.';
+}
+function fallbackDayGoals(tasks){
+  var names=(tasks||[]).map(function(t){ return t.t; }).filter(function(x){ return !!x; });
+  var out=[{t:'Разогрев — 10 минут',d:'Повтори вчерашнее и собери материалы на сегодня.'}];
+  names.slice(0,3).forEach(function(nm,i){ out.push({t:'Блок '+(i+1)+': '+nm,d:'40 минут фокуса без телефона, фиксируй вопросы и результат.'}); });
+  out.push({t:'Итог дня — 10 минут',d:'Запиши что сделал, что не успел, и план на завтра.'});
+  return out.slice(0,6);
+}
+function fetchDayGoals(y,mi,day,tasks){
+  var ck=S.plan.unisKey, ck2='day|'+ck+'|'+y+'-'+mi+'-'+day;
+  if(PLAN_CACHE[ck2]) return Promise.resolve(PLAN_CACHE[ck2]);
+  return aiTry(dayGoalsPrompt(y,mi,day,tasks),function(o){
+    var arr=o.goals||o.steps||[];
+    if(!arr.length) throw new Error('empty');
+    var out=arr.slice(0,6).map(function(r){ return {t:String(r.t||''),d:String((r.how!=null?r.how:(r.d||'')))}; })
+      .filter(function(r){ return r.t; });
+    if(!out.length) throw new Error('empty');
+    PLAN_CACHE[ck2]=out; return out;
+  });
+}
+function ensureDayGoals(y,mi,day){
+  if(!ensureUnified()) return;
+  if(!S.plan.dayGoals) S.plan.dayGoals={};
+  if(!S.plan.dayChecks) S.plan.dayChecks={};
+  var key=monthKey(y,mi)+'-'+day;
+  if(S.plan.dayGoals[key]) return;
+  var mp=S.plan.monthPlans[monthKey(y,mi)], tasks=[];
+  if(mp){ for(var i=0;i<mp.length;i++) if(mp[i].day===day) tasks.push(mp[i]); }
+  if(!tasks.length) return;
+  var ck=S.plan.unisKey, lk='day|'+ck+'|'+key;
+  if(PLAN_LOADING[lk]) return; PLAN_LOADING[lk]=1;
+  withTimeout(fetchDayGoals(y,mi,day,tasks)).then(function(out){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    if(!S.plan.dayGoals) S.plan.dayGoals={};
+    S.plan.dayGoals[key]=out; save(); refreshViews();
+  }).catch(function(){
+    delete PLAN_LOADING[lk];
+    if(!S.plan||S.plan.unisKey!==ck) return;
+    if(!S.plan.dayGoals) S.plan.dayGoals={};
+    S.plan.dayGoals[key]=fallbackDayGoals(tasks); save(); refreshViews();
+  });
+}
+function toggleDayGoal(key,ix){
+  if(!S.plan) return;
+  if(!S.plan.dayChecks) S.plan.dayChecks={};
+  if(!S.plan.dayChecks[key]) S.plan.dayChecks[key]={};
+  if(S.plan.dayChecks[key][ix]) delete S.plan.dayChecks[key][ix]; else S.plan.dayChecks[key][ix]=1;
+  save(); refreshViews();
+}
+function toggleCollapse(key){
+  if(!S.collapsed||typeof S.collapsed!=='object') S.collapsed={};
+  if(S.collapsed[key]) delete S.collapsed[key]; else S.collapsed[key]=1;
+  save();
+  var sc=0, scroller=null;
+  try{ scroller=document.getElementById('view-cal'); sc=scroller?scroller.scrollTop:0; }catch(e){}
+  renderCal();
+  try{ if(scroller) scroller.scrollTop=sc; }catch(e){}
+}
+var calY=null, calM=0;
+function fallbackTier(){
+  return [
+    {tier:'DREAM',name:'MIT',place:'Кембридж, США',match:98,reason:'Мировой топ-1 по технологиям и AI — мечта для сильных в математике и программировании.'},
+    {tier:'DREAM',name:'Stanford University',place:'Калифорния, США',match:96,reason:'Кремниевая долина, стартапы и исследования — идеал для tech и бизнеса.'},
+    {tier:'DREAM',name:'University of Oxford',place:'Оксфорд, Великобритания',match:94,reason:'Престиж и сильная наука — мечта для академического трека.'},
+    {tier:'DREAM',name:'Harvard University',place:'Кембридж, США',match:93,reason:'Бренд, нетворк и гранты — топ-цель при высоких амбициях.'},
+    {tier:'DREAM',name:'Назарбаев Университет',place:'Астана, Казахстан',match:91,reason:'Топ-1 вуз страны на английском — реальная мечта внутри Казахстана.'},
+    {tier:'TARGET',name:'КБТУ',place:'Алматы, Казахстан',match:88,reason:'Сильные IT, бизнес и инженерия, связи с индустрией.'},
+    {tier:'TARGET',name:'МУИТ (IITU)',place:'Алматы, Казахстан',match:85,reason:'Профильный IT-вуз: AI, кибербезопасность, разработка.'},
+    {tier:'TARGET',name:'University of Toronto',place:'Торонто, Канада',match:84,reason:'Сильный CS и инженерия, проще поступить чем в Ivy, есть стипендии.'},
+    {tier:'TARGET',name:'SDU',place:'Каскелен, Казахстан',match:83,reason:'Обучение на английском, хорошая IT-школа.'},
+    {tier:'TARGET',name:'KAIST',place:'Тэджон, Корея',match:82,reason:'Топ-техно Кореи с щедрыми стипендиями для иностранцев.'},
+    {tier:'TARGET',name:'КазНУ им. аль-Фараби',place:'Алматы, Казахстан',match:81,reason:'Классический университет с сильной наукой и бюджетными местами.'},
+    {tier:'TARGET',name:'Seoul National University',place:'Сеул, Корея',match:80,reason:'Престиж Азии, гранты KGSP, сильные инженерия и бизнес.'},
+    {tier:'TARGET',name:'Astana IT University',place:'Астана, Казахстан',match:80,reason:'Молодой IT-вуз в столице, упор на практику и проекты.'},
+    {tier:'TARGET',name:'METU (ODTÜ)',place:'Анкара, Турция',match:79,reason:'Обучение на английском, доступные цены и гранты Türkiye Burslari.'},
+    {tier:'SAFETY',name:'КазНТУ им. Сатпаева',place:'Алматы, Казахстан',match:76,reason:'Лучший выбор для инженерии, много грантов.'},
+    {tier:'SAFETY',name:'ЕНУ им. Гумилева',place:'Астана, Казахстан',match:74,reason:'Крупный госвуз в столице, высокий шанс на грант.'},
+    {tier:'SAFETY',name:'КИМЭП',place:'Алматы, Казахстан',match:73,reason:'Бизнес, право и соцнауки на английском, понятные требования.'},
+    {tier:'SAFETY',name:'КазНПУ им. Абая',place:'Алматы, Казахстан',match:72,reason:'Педагогика, психология и языки — доступный проходной.'},
+    {tier:'SAFETY',name:' UIB (Университет Международного Бизнеса)',place:'Алматы, Казахстан',match:70,reason:'Бизнес и маркетинг, легко поступить, практика с 1 курса.'},
+    {tier:'SAFETY',name:'MUIT College / Turan University',place:'Алматы, Казахстан',match:68,reason:'Запасной вариант: IT и бизнес с низким порогом входа.'}
+  ];
+}
+
+function getChosen(){ migrateState(); return S.chosenUnis||[]; }
+function isPicked(name){ return getChosen().some(function(u){ return u.name===name; }); }
+function syncActive(){ if(getChosen().length && !S.chosenUni) S.chosenUni=getChosen()[0]; if(!getChosen().length) S.chosenUni=null; }
+function toggleUni(name,place){
+  migrateState();
+  var ix=-1;
+  for(var i=0;i<S.chosenUnis.length;i++) if(S.chosenUnis[i].name===name) ix=i;
+  if(ix===-1){ S.chosenUnis.push({name:name,place:place||''}); toast('Добавлено: '+name+' ('+S.chosenUnis.length+')'); }
+  else { S.chosenUnis.splice(ix,1); toast('Убрано: '+name); }
+  syncActive(); save(); renderTier();
+}
+function chooseUni(name,place){
+  migrateState();
+  if(!isPicked(name)) S.chosenUnis.push({name:name,place:place||''});
+  S.chosenUni={name:name,place:place||''};
+  save(); try{ closeUni(); }catch(e){}
+  toast('Выбран: '+name+' • всего '+S.chosenUnis.length);
+  showTab('main');
+}
+function continueWithChosen(){
+  var n=getChosen().length;
+  if(!n){ toast('Выбери хотя бы один вуз тапом по кнопке'); return; }
+  syncActive(); save();
+  showTab('main');
+}
+
+function renderTier(){
+  var box=document.getElementById('tierList');
+  var raw=(AI_UNIS&&AI_UNIS.length)?AI_UNIS:fallbackTier();
+  var list=raw.map(function(u){ return {tier:normTier(u.tier),name:u.name,place:u.place,match:u.match,reason:u.reason}; });
+  var h='';
+  if(!AI_UNIS||!AI_UNIS.length) h+='<div class="ainote">ИИ временно недоступен — показан базовый подбор из 20 вузов. Проверь интернет и попробуй пройти заново позже.</div>';
+  else h+='<div class="ainote">Подобрано ИИ на основе твоей анкеты ✨ Всего '+list.length+' вузов: 5 Dream + 9 Target + 6 Safety</div>';
+  var sel=getChosen().length;
+  h+='<div class="multibar"><b>Выбрано: '+sel+'</b><span>Можно выбрать несколько — тапай «Выбрать» на карточках</span>'
+    +'<div style="height:8px"></div><button class="btn" id="btnContinueMulti"'+(sel?'':' style="opacity:.5"')+'>Продолжить с выбранными ('+sel+') →</button></div>';
+  [['DREAM','🌟 Dream — мечта','Топовые, сложно поступить','dream','★'],['TARGET','🎯 Target — целевые','Реальный шанс поступить','target','◉'],['SAFETY','🛟 Safety — страховочные','Почти гарантированно','safety','●']].forEach(function(g){
+    var items=list.filter(function(u){ return u.tier===g[0]; });
+    if(!items.length) return;
+    h+='<div class="tier-head"><div class="tier-badge '+g[3]+'">'+g[4]+'</div><div><div class="tier-name">'+g[1]+'</div><div class="tier-sub">'+items.length+' вузов • '+g[2]+'</div></div></div>';
+    items.forEach(function(u){
+      var picked = isPicked(u.name);
+      h+='<div class="unicard'+(picked?' picked':'')+'" data-uni="'+esc(u.name)+'">'+uniCardPhotoHTML(u.name)+'<h4>'+esc(u.name)+'</h4><div class="place">'+esc(u.place)+'</div><div class="bar"><i style="width:'+u.match+'%"></i></div><div class="pct">'+u.match+'% совпадение</div><p>'+esc(u.reason)+'</p><button class="choosebtn'+(picked?' picked':'')+'" data-choose="'+esc(u.name)+'">'+(picked?'✓ Выбран — нажать чтобы убрать':'＋ Выбрать этот вуз')+'</button><div class="tap">Нажми на карточку — как поступить →</div></div>';
+    });
+  });
+  box.innerHTML=h;
+  var cb=document.getElementById('btnContinueMulti'); if(cb) cb.onclick=continueWithChosen;
+  box.querySelectorAll('.unicard').forEach(function(c){
+    c.addEventListener('click',function(){ openUni(c.getAttribute('data-uni')); });
+  });
+  box.querySelectorAll('[data-choose]').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      var nm=b.getAttribute('data-choose');
+      var u=currentTierList().filter(function(x){ return x.name===nm; })[0]||{name:nm,place:''};
+      toggleUni(u.name,u.place);
+    });
+  });
+}
+
+/* ================= Подбор направлений ================= */
+function like(s){ var d=S.subj[s]; return d?(d.like||0):0; }
+function agreeYes(v){ return v==='yes'||v==='rather_yes'; }
+function scoreDirs(){
+  var D=[];
+  function dir(name,desc){ var o={name:name,desc:desc,score:0,reasons:[]}; D.push(o); return o; }
+  var it=dir('IT и программирование','Разработка, приложения, сайты и стартапы в tech.');
+  var ai=dir('AI и данные','Искусственный интеллект, анализ данных, ML.');
+  var med=dir('Медицина','Врач, стоматология, фармация, биотех.');
+  var eng=dir('Инженерия','Механика, электроника, строительство, энергетика.');
+  var biz=dir('Бизнес и предпринимательство','Свой бизнес, стартапы, менеджмент.');
+  var fin=dir('Финансы и экономика','Банки, инвестиции, аналитика, учёт.');
+  var des=dir('Дизайн','UI/UX, графика, моушн, продукт.');
+  var arch=dir('Архитектура','Проектирование зданий и пространств.');
+  var law=dir('Право и международные отношения','Юрист, дипломат, госслужба.');
+  var media=dir('Медиа и маркетинг','Журналистика, SMM, реклама, контент.');
+  var sci=dir('Наука','Исследования, лаборатории, академия.');
+  var psy=dir('Психология и образование','Помощь людям, преподавание.');
+  var spo=dir('Спорт','Профессиональный спорт, тренерство.');
+  function add(o,pts,why){ o.score+=pts; if(why&&o.reasons.length<3) o.reasons.push(why); }
+  var I=S.interests||[], K=S.skills||[];
+  function aboutYes(k){ return S.about&&S.about[k]==='yes'; }
+  if(hasI('Компьютеры')) add(it,3,'интерес к компьютерам и технологиям');
+  if(hasI('Искусственный интеллект')){ add(ai,3,'интерес к ИИ'); add(it,1); }
+  if(hasI('Игры')) add(it,1,'интерес к играм');
+  if(hasI('Безопасность')) add(it,1,'интерес к безопасности');
+  if(has(K,'Программирование')) add(it,3,'умеешь программировать');
+  if(has(K,'Создание сайтов')) add(it,2,'умеешь делать сайты');
+  if(has(K,'Создание приложений')) add(it,2,'умеешь делать приложения');
+  if(has(K,'Работа с AI')) add(ai,2,'работаешь с AI');
+  if(has(K,'Анализ данных')) add(ai,3,'умеешь анализировать данные');
+  if(like('Информатика')>=4) add(it,2,'нравится информатика');
+  if(like('Математика')>=4){ add(ai,2,'нравится математика'); add(fin,1,'нравится математика'); add(eng,1,'нравится математика'); }
+  var tc={tech:0,sci:0,biz:0,art:0};
+  Object.keys(S.sittest||{}).forEach(function(k){ var tt=S.sittest[k]; if(tc[tt]!==undefined) tc[tt]++; });
+  if(tc.tech) add(it,tc.tech,tc.tech+' из 10 тестов — за технологии');
+  if(tc.sci) add(sci,tc.sci,tc.sci+' из 10 тестов — за науку');
+  if(tc.biz) add(biz,tc.biz,tc.biz+' из 10 тестов — за бизнес');
+  if(tc.art) add(des,tc.art,tc.art+' из 10 тестов — за творчество');
+  if(S.work.people==='pc') add(it,1,'комфортнее с компьютером');
+  if(S.work.practice==='prac'){ add(eng,1,'ближе практика'); add(it,1,'ближе практика'); }
+  if(agreeYes(S.work.solve)){ add(it,1,'любишь сложные задачи'); add(eng,1,'любишь сложные задачи'); }
+  if(S.progProjects==='yes') add(it,1,'уже есть свои проекты');
+  if(hasI('Медицина')) add(med,3,'интерес к медицине');
+  if(hasI('Биология')) add(med,2,'интерес к биологии');
+  if(hasI('Химия')) add(med,1,'интерес к химии');
+  if(hasI('Помощь людям')){ add(med,1,'желание помогать людям'); add(psy,1,'желание помогать людям'); }
+  if(like('Биология')>=4) add(med,2,'нравится биология');
+  if(like('Химия')>=4) add(med,2,'нравится химия');
+  if(agreeYes(S.work.help)) add(med,2,'нравится помогать людям');
+  if(S.medInterest>=4) add(med,2,'высокий интерес к медицине');
+  if(hasI('инженерия')) add(eng,3,'интерес к инженерии');
+  if(hasI('Машины')) add(eng,1,'интерес к машинам');
+  if(like('Физика')>=4) add(eng,2,'нравится физика');
+  if(agreeYes(S.work.create)){ add(eng,1,'нравится создавать новое'); add(des,1,'нравится создавать новое'); }
+  if(hasI('Бизнес')) add(biz,3,'интерес к бизнесу и предпринимательству');
+  if(hasI('управление')) add(biz,1,'интерес к управлению');
+  if(has(K,'Предпринимательство')) add(biz,2,'есть опыт предпринимательства');
+  if(has(K,'Продажи')) add(biz,1,'умеешь продавать');
+  if(has(K,'Лидерство')) add(biz,1,'лидерские навыки');
+  if(agreeYes(S.work.lead)) add(biz,2,'нравится руководить');
+  if(agreeYes(S.career.business)) add(biz,2,'хочешь свой бизнес');
+  if(hasI('Экономика')) add(fin,3,'интерес к экономике и финансам');
+  if(hasI('Математика')){ add(fin,1,'интерес к математике'); add(ai,1,'интерес к математике'); }
+  if(agreeYes(S.work.numbers)) add(fin,2,'нравится работать с цифрами');
+  if(agreeYes(S.work.analyze)){ add(fin,1,'нравится анализировать'); add(ai,1,'нравится анализировать'); }
+  if(hasI('Дизайн')) add(des,3,'интерес к дизайну');
+  if(has(K,'Дизайн')) add(des,2,'умеешь дизайнить');
+  if(has(K,'Монтаж видео')){ add(des,1,'умеешь монтировать'); add(media,1,'умеешь монтировать'); }
+  if((S.designTools||[]).length) add(des,1,'владеешь инструментами дизайна');
+  if(hasI('архитектура')) add(arch,3,'интерес к архитектуре');
+  if(hasI('Право')) add(law,3,'интерес к праву');
+  if(hasI('международные отношения')) add(law,2,'интерес к международным отношениям');
+  if(hasI('Журналистика')){ add(media,2,'интерес к журналистике'); add(law,1,'интерес к журналистике'); }
+  if(hasI('История')) add(law,1,'интерес к истории и обществу');
+  if(hasI('Литература')) add(media,1,'любовь к писательству');
+  if(agreeYes(S.work.texts)){ add(law,1,'нравится работать с текстами'); add(media,1,'нравится работать с текстами'); }
+  if(has(K,'Написание текстов')){ add(media,1,'умеешь писать тексты'); add(law,1,'умеешь писать тексты'); }
+  if(hasI('Кино, видео')) add(media,2,'интерес к кино и контенту');
+  if(agreeYes(S.work.speak)){ add(media,1,'нравится выступать'); add(law,1,'нравится выступать'); }
+  if(agreeYes(S.work.variety)) add(media,1,'любишь разнообразие задач');
+  if(hasI('Наука')) add(sci,3,'интерес к науке');
+  if(hasI('Космос')){ add(sci,2,'интерес к космосу'); add(eng,1,'интерес к космосу'); }
+  if(hasI('Природа')) add(sci,1,'интерес к природе');
+  if(hasI('Сельское хозяйство')) add(sci,1,'интерес к сельскому хозяйству');
+  if(agreeYes(S.work.research)) add(sci,2,'нравится исследовать');
+  if(S.work.practice==='theor') add(sci,1,'ближе теория');
+  if(has(K,'Исследовательская работа')) add(sci,2,'есть опыт исследований');
+  if(agreeYes(S.career.science)) add(sci,1,'хочешь в науку');
+  if(hasI('Психология')) add(psy,2,'интерес к психологии');
+  if(hasI('Образование')) add(psy,2,'интерес к образованию');
+  if(S.work.people==='people') add(psy,1,'комфортнее с людьми');
+  if(hasI('Спорт') && !hasI('Транспорт')) add(spo,2,'интерес к спорту');
+  if(has(S.hobbies,'Спорт')) add(spo,2,'спорт — хобби');
+  if(aboutYes('sport')) add(spo,1,'занимаешься спортом');
+  if(has(S.achievements,'Спортивные достижения')) add(spo,2,'спортивные достижения');
+  D.sort(function(x,y){ return y.score-x.score; });
+  var top=D[0].score||1;
+  D.forEach(function(d){ d.pct=Math.round(100*d.score/top); });
+  return D;
+}
+
+function finish(){
+  S.done=true; save();
+  pfill.style.width='100%';
+  var name=S.name||'Друг';
+  document.getElementById('resTitle').innerHTML = esc(name)+', твой профиль <span>готов</span> 🎉';
+  var bits=[];
+  if(S.grade) bits.push(S.grade);
+  if(S.dreamJob) bits.push('мечта — '+S.dreamJob);
+  if(S.studyCountry==='kz') bits.push('учёба в Казахстане');
+  if(S.studyCountry==='abroad') bits.push('учёба за границей'+(S.studyCountryWhich?' ('+S.studyCountryWhich+')':''));
+  document.getElementById('resHello').textContent = bits.length?('Коротко о тебе: '+bits.join(' • ')+'. Вот направления, которые подходят тебе больше всего:'):'Вот направления, которые подходят тебе больше всего:';
+  var D=scoreDirs().slice(0,3), box=document.getElementById('dirs');
+  box.innerHTML = D.map(function(d,ix){
+    return '<div class="dir'+(ix===0?' top':'')+'"><div class="rank">'+(ix===0?'★ Лучшее совпадение':'Вариант '+(ix+1))+'</div><h3>'+esc(d.name)+'</h3><p>'+esc(d.desc)+'</p><div class="bar"><i data-w="'+d.pct+'"></i></div><div class="pct">'+d.pct+'% совпадение</div>'+(d.reasons.length?'<p style="margin-top:6px">Почему: '+esc(d.reasons.join(', '))+'</p>':'')+'</div>';
+  }).join('');
+  setTimeout(function(){ box.querySelectorAll('.bar i').forEach(function(b){ b.style.width=b.getAttribute('data-w')+'%'; }); },80);
+  var rows=[];
+  function row(t,v){ if(v&&(v.length||typeof v==='number')) rows.push('<div class="kv"><b>'+t+':</b> '+esc(Array.isArray(v)?v.join(', '):v)+'</div>'); }
+  row('Имя',S.name); row('Instagram',S.instagram?('@'+S.instagram):''); row('Возраст',S.age); row('Класс',S.grade); row('Страна',S.country);
+  row('Хочет учиться',S.knowCountryWhich); row('Спорт (звания)',S.sportAch); row('Музыка (что закончил)',S.musicDone); row('Клубы',S.clubsWhich); row('Интересы',S.interests); row('Навыки',S.skills); row('Хобби',S.hobbies);
+  row('Достижения',S.achievements); row('Языки',S.langs); row('Рассматривает',S.considerJobs);
+  document.getElementById('profList').innerHTML = rows.join('')||'<div class="kv">Пока пусто</div>';
+  renderTier();
+  show(vr);
+}
+
+document.getElementById('btnMain').addEventListener('click',function(){
+  showTab('main');
+});
+document.getElementById('btnDownload').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var aEl=document.createElement('a'); aEl.href=URL.createObjectURL(blob);
+  aEl.download='talap-profile.json'; aEl.click(); setTimeout(function(){ URL.revokeObjectURL(aEl.href); },2000);
+});
+document.getElementById('btnReset').addEventListener('click',function(){
+  store(); S=freshState(); secIdx=0; save(); show(vs); renderSection(1);
+});
+
+/* ================= Старт: главная ================= */
+secIdx = load();
+try{ var savedTier=JSON.parse(localStorage.getItem('talapTier')||localStorage.getItem('locusTier')); if(savedTier&&savedTier.length>=10){ AI_UNIS=savedTier; try{ localStorage.setItem('talapTier',JSON.stringify(savedTier)); localStorage.removeItem('locusTier'); }catch(e){} } }catch(e){}
+var hadData = !!(S.name||S.age||(S.interests&&S.interests.length)||secIdx>0||S.done);
+if(hadData){ showTab('main'); setTimeout(function(){ toast('Прогресс восстановлен ✓'); },600); }
+else { showTab('survey'); }
+</script>
+</body>
+</html>
