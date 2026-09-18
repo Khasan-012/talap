@@ -658,7 +658,6 @@ function buildQuestions(sec){
   function p(q){ q.sec=sec; a.push(q); return q; }
   if(sec===0){
     p({id:'name',title:'Имя',type:'text',key:'name',ph:'Твоё имя',req:1});
-    p({id:'insta',title:'Твой Instagram',sub:'Ник без @ — покажем в новостях и профиле. Можно пропустить',type:'text',key:'instagram',ph:'никнейм',optional:1});
     p({id:'age',title:'Возраст',sub:'Покрути вниз-вверх',type:'wheel',key:'age'});
     p({id:'grade',title:'Класс',type:'single',key:'grade',options:strOpts(['6 класс','7 класс','8 класс','9 класс','10 класс','11 класс','12 класс (НИШ)'])});
     p({id:'country',title:'Страна',type:'text',key:'country',ph:'Например, Казахстан'});
