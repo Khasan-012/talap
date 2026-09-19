@@ -588,30 +588,6 @@ function toggleCollapse(key){
   try{ if(scroller) scroller.scrollTop=sc; }catch(e){}
 }
 var calY=null, calM=0;
-function fallbackTier(){
-  return [
-    {tier:'DREAM',name:'MIT',place:'Кембридж, США',match:98,reason:'Мировой топ-1 по технологиям и AI — мечта для сильных в математике и программировании.'},
-    {tier:'DREAM',name:'Stanford University',place:'Калифорния, США',match:96,reason:'Кремниевая долина, стартапы и исследования — идеал для tech и бизнеса.'},
-    {tier:'DREAM',name:'University of Oxford',place:'Оксфорд, Великобритания',match:94,reason:'Престиж и сильная наука — мечта для академического трека.'},
-    {tier:'DREAM',name:'Harvard University',place:'Кембридж, США',match:93,reason:'Бренд, нетворк и гранты — топ-цель при высоких амбициях.'},
-    {tier:'DREAM',name:'Назарбаев Университет',place:'Астана, Казахстан',match:91,reason:'Топ-1 вуз страны на английском — реальная мечта внутри Казахстана.'},
-    {tier:'TARGET',name:'КБТУ',place:'Алматы, Казахстан',match:88,reason:'Сильные IT, бизнес и инженерия, связи с индустрией.'},
-    {tier:'TARGET',name:'МУИТ (IITU)',place:'Алматы, Казахстан',match:85,reason:'Профильный IT-вуз: AI, кибербезопасность, разработка.'},
-    {tier:'TARGET',name:'University of Toronto',place:'Торонто, Канада',match:84,reason:'Сильный CS и инженерия, проще поступить чем в Ivy, есть стипендии.'},
-    {tier:'TARGET',name:'SDU',place:'Каскелен, Казахстан',match:83,reason:'Обучение на английском, хорошая IT-школа.'},
-    {tier:'TARGET',name:'KAIST',place:'Тэджон, Корея',match:82,reason:'Топ-техно Кореи с щедрыми стипендиями для иностранцев.'},
-    {tier:'TARGET',name:'КазНУ им. аль-Фараби',place:'Алматы, Казахстан',match:81,reason:'Классический университет с сильной наукой и бюджетными местами.'},
-    {tier:'TARGET',name:'Seoul National University',place:'Сеул, Корея',match:80,reason:'Престиж Азии, гранты KGSP, сильные инженерия и бизнес.'},
-    {tier:'TARGET',name:'Astana IT University',place:'Астана, Казахстан',match:80,reason:'Молодой IT-вуз в столице, упор на практику и проекты.'},
-    {tier:'TARGET',name:'METU (ODTÜ)',place:'Анкара, Турция',match:79,reason:'Обучение на английском, доступные цены и гранты Türkiye Burslari.'},
-    {tier:'SAFETY',name:'КазНТУ им. Сатпаева',place:'Алматы, Казахстан',match:76,reason:'Лучший выбор для инженерии, много грантов.'},
-    {tier:'SAFETY',name:'ЕНУ им. Гумилева',place:'Астана, Казахстан',match:74,reason:'Крупный госвуз в столице, высокий шанс на грант.'},
-    {tier:'SAFETY',name:'КИМЭП',place:'Алматы, Казахстан',match:73,reason:'Бизнес, право и соцнауки на английском, понятные требования.'},
-    {tier:'SAFETY',name:'КазНПУ им. Абая',place:'Алматы, Казахстан',match:72,reason:'Педагогика, психология и языки — доступный проходной.'},
-    {tier:'SAFETY',name:' UIB (Университет Международного Бизнеса)',place:'Алматы, Казахстан',match:70,reason:'Бизнес и маркетинг, легко поступить, практика с 1 курса.'},
-    {tier:'SAFETY',name:'MUIT College / Turan University',place:'Алматы, Казахстан',match:68,reason:'Запасной вариант: IT и бизнес с низким порогом входа.'}
-  ];
-}
 
 function getChosen(){ migrateState(); return S.chosenUnis||[]; }
 function isPicked(name){ return getChosen().some(function(u){ return u.name===name; }); }
@@ -641,11 +617,16 @@ function continueWithChosen(){
 
 function renderTier(){
   var box=document.getElementById('tierList');
-  var raw=(AI_UNIS&&AI_UNIS.length)?AI_UNIS:fallbackTier();
+  if(!AI_UNIS||!AI_UNIS.length){
+    box.innerHTML='<div class="ainote">ИИ не смог подобрать вузы ('+esc(typeof AI_ERR!=='undefined'&&AI_ERR?AI_ERR:'нет связи')+'). Готовых списков мы не показываем — только личный подбор. Проверь интернет и попробуй ещё раз.</div>'
+      +'<button class="btn" id="btnRetryAi">Попробовать снова ↻</button>';
+    var rb=document.getElementById('btnRetryAi'); if(rb) rb.onclick=function(){ showLoading(); };
+    return;
+  }
+  var raw=AI_UNIS;
   var list=raw.map(function(u){ return {tier:normTier(u.tier),name:u.name,place:u.place,match:u.match,reason:u.reason}; });
   var h='';
-  if(!AI_UNIS||!AI_UNIS.length) h+='<div class="ainote">ИИ временно недоступен — показан базовый подбор из 20 вузов. Проверь интернет и попробуй пройти заново позже.</div>';
-  else h+='<div class="ainote">Подобрано ИИ на основе твоей анкеты ✨ Всего '+list.length+' вузов: 5 Dream + 9 Target + 6 Safety</div>';
+  h+='<div class="ainote">Подобрано ИИ на основе твоей анкеты ✨ Всего '+list.length+' вузов: 5 Dream + 9 Target + 6 Safety</div>';
   var sel=getChosen().length;
   h+='<div class="multibar"><b>Выбрано: '+sel+'</b><span>Можно выбрать несколько — тапай «Выбрать» на карточках</span>'
     +'<div style="height:8px"></div><button class="btn" id="btnContinueMulti"'+(sel?'':' style="opacity:.5"')+'>Продолжить с выбранными ('+sel+') →</button></div>';

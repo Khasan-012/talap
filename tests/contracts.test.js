@@ -55,13 +55,10 @@ test('фото: wiki-резолвер и инициалы подключены �
   assert.ok(read('js/ai-tier.js').includes('upgradeUniPhotos(body)'));
 });
 
-test('fallbackTier держит 20 вузов (5/9/6)', () => {
+test('тирлист только от ИИ: без зашитого набора вузов', () => {
   const plan = read('js/plan.js');
-  const body = plan.slice(plan.indexOf('function fallbackTier'));
-  const dreams = (body.match(/tier:'DREAM'/g) || []).length;
-  const targets = (body.match(/tier:'TARGET'/g) || []).length;
-  const safeties = (body.match(/tier:'SAFETY'/g) || []).length;
-  assert.equal(dreams, 5);
-  assert.equal(targets, 9);
-  assert.equal(safeties, 6);
+  const ai = read('js/ai-tier.js');
+  assert.ok(!plan.includes('fallbackTier'), 'нет фолбэк-списка в рендере');
+  assert.ok(!ai.includes('fallbackTier'), 'ИИ-ответ не дополняется готовым набором');
+  assert.ok(plan.includes('btnRetryAi'), 'есть retry при недоступности ИИ');
 });

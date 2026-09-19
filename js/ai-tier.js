@@ -148,10 +148,6 @@ function callModel(model,prompt){
     if(out.length<10) throw new Error('too few');
     var seen={}, res=[];
     out.forEach(function(u){ var k=u.name.toLowerCase(); if(!seen[k]){ seen[k]=1; res.push(u); } });
-    try{
-      var fb=fallbackTier();
-      for(var i=0;i<fb.length&&res.length<20;i++){ var f=fb[i], k2=String(f.name).toLowerCase(); if(!seen[k2]){ seen[k2]=1; res.push(f); } }
-    }catch(e){}
     return res.slice(0,20);
   });
 }
@@ -236,7 +232,7 @@ function renderReviewsInto(u){
   });
 }
 function currentTierList(){
-  var raw=(AI_UNIS&&AI_UNIS.length)?AI_UNIS:fallbackTier();
+  var raw=(AI_UNIS&&AI_UNIS.length)?AI_UNIS:[];
   return raw.map(function(u){ return {tier:normTier(u.tier),name:u.name,place:u.place,match:u.match,reason:u.reason}; });
 }
 function openUni(name){
