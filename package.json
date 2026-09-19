@@ -1,0 +1,13 @@
+{
+  "name": "talap",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Talap — анкета профиля, ИИ-тирлист вузов и план поступления",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/tiers.test.js tests/profile.test.js tests/schema.test.js tests/photos.test.js tests/contracts.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
