@@ -91,7 +91,7 @@
   .secinfo { flex:1; min-width:0; }
   .secinfo b { display:block; font-size:15px; }
   .secinfo span { font-size:12px; color:var(--mut); }
-  .pbar { height:7px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
+  .pbar { height:7px; border-radius:99px; background:transparent; border:1px solid var(--line); overflow:hidden; }
   .pfill { height:100%; width:0; border-radius:99px; background:var(--grad); transition:width .4s ease; }
   .ticks { display:flex; gap:4px; margin-top:8px; }
   .ticks i { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.12); }
