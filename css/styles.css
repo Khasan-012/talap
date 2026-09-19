@@ -92,11 +92,13 @@
   .secinfo b { display:block; font-size:15px; }
   .secinfo span { font-size:12px; color:var(--mut); }
   .pbar { height:7px; border-radius:99px; background:transparent; border:1px solid var(--line); overflow:hidden; }
-  .pfill { height:100%; width:0; border-radius:99px; background:var(--grad); transition:width .4s ease; }
+  .pfill { height:100%; width:0; border-radius:99px; background:rgba(255,255,255,.18);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.15); transition:width .4s ease; }
   .ticks { display:flex; gap:4px; margin-top:8px; }
   .ticks i { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.12); }
-  .ticks i.done { background:rgba(0,210,255,.45); }
-  .ticks i.cur { background:var(--acc); box-shadow:0 0 8px rgba(0,210,255,.7); }
+  .ticks i.done { background:rgba(255,255,255,.28); }
+  .ticks i.cur { background:rgba(255,255,255,.55); box-shadow:none; }
 
   .stagewrap { flex:1; overflow-y:auto; padding:18px 2px 10px; scrollbar-width:thin; }
   .stage.in-r { animation:slideR .35s cubic-bezier(.22,1,.36,1); }
@@ -440,6 +442,41 @@
     background:rgba(20,16,50,.95); border:1px solid var(--acc); color:#fff; font-size:14px;
     padding:12px 20px; border-radius:14px; opacity:0; pointer-events:none; transition:.3s; max-width:90vw; text-align:center; }
   .toast.show { opacity:1; transform:translateX(-50%); }
+
+  /* ---------- Приветствие: первый вход ---------- */
+  .whero { position:fixed; inset:0; z-index:90; background:radial-gradient(120% 90% at 50% 0%,#0b1030 0%,#040312 60%,#01010a 100%);
+    overflow:hidden; display:flex; align-items:flex-start; justify-content:center; }
+  .wstars { position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(1.5px 1.5px at 12% 22%,#fff 60%,transparent 61%),
+      radial-gradient(1px 1px at 32% 8%,#9be9ff 60%,transparent 61%),
+      radial-gradient(2px 2px at 58% 18%,#fff 60%,transparent 61%),
+      radial-gradient(1px 1px at 74% 32%,#fff 60%,transparent 61%),
+      radial-gradient(1.5px 1.5px at 88% 12%,#ffd166 60%,transparent 61%),
+      radial-gradient(1px 1px at 45% 30%,#fff 60%,transparent 61%),
+      radial-gradient(2px 2px at 22% 42%,#fff 60%,transparent 61%),
+      radial-gradient(1px 1px at 66% 44%,#9be9ff 60%,transparent 61%),
+      radial-gradient(1.5px 1.5px at 6% 58%,#fff 60%,transparent 61%),
+      radial-gradient(1px 1px at 94% 52%,#fff 60%,transparent 61%);
+    animation:twinkle 3s ease-in-out infinite alternate; }
+  @keyframes twinkle { from { opacity:.55; } to { opacity:1; } }
+  .w-inner { position:relative; z-index:2; text-align:center; padding:calc(64px + env(safe-area-inset-top)) 28px 0;
+    max-width:520px; animation:fadeUp .6s ease; }
+  .w-inner .brand { font-size:13px; letter-spacing:6px; text-transform:uppercase; color:var(--acc); }
+  .w-inner h1 { font-size:44px; font-weight:800; letter-spacing:-1px; line-height:1.08; margin:12px 0 10px; color:#fff; }
+  .w-inner p { font-size:15px; color:var(--mut); line-height:1.55; margin-bottom:22px; }
+  .w-inner .btn { max-width:320px; margin:0 auto;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.22);
+    backdrop-filter:blur(20px) saturate(1.4); -webkit-backdrop-filter:blur(20px) saturate(1.4);
+    box-shadow:0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+    font-weight:700; }
+  .w-inner .btn:hover { background:rgba(255,255,255,.18); background-position:initial; }
+  .w-inner .btn:active { transform:scale(.98); background:rgba(255,255,255,.22); }
+  /* Земля из точек: видна только часть, остальное за рамками экрана */
+  .earth-wrap { position:absolute; left:50%; bottom:-52vmin; transform:translateX(-50%);
+    width:120vmin; height:120vmin; pointer-events:none; }
+  #globe { width:100%; height:100%; display:block; }
 
   /* ---------- Desktop: режим сайта ---------- */
   @media (min-width:760px){

@@ -300,7 +300,11 @@ function goNext(){
   secIdx++; save(); renderSection(1);
 }
 function goBack(){
-  if(secIdx<=0){ showTab('main'); return; }
+  if(secIdx<=0){
+    var fresh = !(S.name||S.age||(S.interests&&S.interests.length)||S.done);
+    if(fresh){ show(vw); try{ startGlobe(); }catch(e){} return; }
+    showTab('main'); return;
+  }
   secIdx--; save(); renderSection(-1);
 }
 document.getElementById('btnNext').addEventListener('click',goNext);

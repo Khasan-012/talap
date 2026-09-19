@@ -1,8 +1,9 @@
 /* ================= Экраны ================= */
 var vs=document.getElementById('view-survey'), vr=document.getElementById('view-result'), vl=document.getElementById('view-loading');
 var vm2=document.getElementById('view-main'), vc2=document.getElementById('view-cal'), vsoon=document.getElementById('view-awards');
+var vw=document.getElementById('view-welcome');
 var tabbar=document.getElementById('tabbar');
-function show(el){ [vs,vr,vl,vm2,vc2,vsoon].forEach(function(x){ x.hidden=(x!==el); }); tabbar.style.display=(el===vm2||el===vc2||el===vsoon)?'':'none'; }
+function show(el){ [vs,vr,vl,vm2,vc2,vsoon,vw].forEach(function(x){ x.hidden=(x!==el); }); tabbar.style.display=(el===vm2||el===vc2||el===vsoon)?'':'none'; }
 function showTab(t){
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active',b.getAttribute('data-tab')===t); });
   if(t==='main'){ renderMain(); renderCal(); show(vm2); }

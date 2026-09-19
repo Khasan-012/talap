@@ -11,6 +11,18 @@
 <body>
 <div class="app">
 
+  <!-- Приветствие: первый вход -->
+  <section id="view-welcome" class="whero" hidden>
+    <div class="wstars"></div>
+    <div class="w-inner">
+      <div class="brand">Talap</div>
+      <h1>Найди свой<br>университет</h1>
+      <p>9 коротких разделов — и ИИ подберёт 20 вузов и план поступления</p>
+      <button class="btn" id="btnStart">Начать</button>
+    </div>
+    <div class="earth-wrap"><canvas id="globe"></canvas></div>
+  </section>
+
   <!-- Опрос: 1 раздел = 1 страница -->
   <section id="view-survey" hidden>
     <div class="topbar">
@@ -95,6 +107,7 @@
   <script src="js/awards.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/scoring-result.js"></script>
+  <script src="js/welcome.js"></script>
   <script src="js/boot.js"></script>
 
 </body>
